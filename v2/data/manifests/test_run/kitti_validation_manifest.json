@@ -1,0 +1,10 @@
+[
+  {
+    "dataset": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000000.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  }
+]
