@@ -4,19 +4,19 @@
 
 The primary path is:
 
-- real stereo images and disparity labels from Hugging Face datasets
-- a compact native Keras student model with only hls4ml-friendly layers
-- full disparity reconstruction in software over candidate disparities `0..15`
-- hls4ml conversion and software parity checks on the trained student
+- direct ground-truth supervision with no teacher or distillation stage
+- a low-resolution shared-feature correlation student model
+- mixed-dataset training across Scene Flow, DrivingStereo, and KITTI
+- hls4ml conversion and parity checks on the extracted feature encoder
 
 ## Implemented pieces
 
 - `training/hf_utils.py`: `.env`-backed Hugging Face token resolution and repo-relative paths
-- `training/stereo_data.py`: real stereo dataset loaders for KITTI-style Hugging Face datasets and Scene Flow tar archives
-- `training/patch_dataset.py`: patch sampling, reconstruction, and disparity metrics for real images
-- `models/keras_student.py`: native Keras student model
-- `training/train_real_stereo.py`: end-to-end pretrain, fine-tune, evaluate, and export CLI
-- `hls4ml/convert_student.py`: hls4ml conversion and parity CLI
+- `training/stereo_data.py`: Scene Flow, DrivingStereo, KITTI 2012/2015, and KITTI-style HF loaders plus mixed manifests
+- `training/augmentation.py`: stereo-safe crop, resize, jitter, and padding utilities
+- `models/keras_student.py`: low-resolution correlation student model
+- `training/train_stereo.py`: end-to-end GT-only mixed-data training CLI
+- `hls4ml/convert_student.py`: feature-extractor export plus hls4ml parity CLI
 - `MODEL.md`: model, training flow, and architecture notes
 
 ## Environment
@@ -36,37 +36,46 @@ KERAS_BACKEND=torch
 Minimal validated run:
 
 ```bash
-KERAS_BACKEND=torch uv run python -m v2.training.train_real_stereo \
-	--pretrain-max-examples 0 \
-	--finetune-max-examples 2 \
-	--validation-max-examples 1 \
-	--max-positions-per-image 64 \
-	--finetune-epochs 1 \
-	--batch-size 64 \
-	--output-dir v2/exports/test_run \
-	--manifest-dir v2/data/manifests/test_run
+KERAS_BACKEND=torch uv run python -m v2.training.train_stereo \
+	--run-name smoke_correlation \
+	--epochs 2 \
+	--batch-size 2 \
+	--chunk-size 8 \
+	--sceneflow-limit 24 \
+	--val-limit 4 \
+	--no-augment
 ```
 
-Scene Flow pretraining can be enabled by setting `--pretrain-max-examples` above zero.
+Full mixed-data training adds local-disk datasets:
+
+```bash
+KERAS_BACKEND=torch CUDA_VISIBLE_DEVICES=0 uv run python -m v2.training.train_stereo \
+	--run-name full_mixed \
+	--driving-stereo-dir v2/data/raw/driving_stereo \
+	--kitti2015-dir v2/data/raw/kitti2015 \
+	--kitti2012-dir v2/data/raw/kitti2012
+```
 
 ## hls4ml conversion
 
 ```bash
 KERAS_BACKEND=torch uv run python -m v2.hls4ml.convert_student \
-	--model v2/exports/test_run/student_patch_model.keras \
-	--parity-batch v2/exports/test_run/parity_batch.npz \
+	--model logs/<run>/checkpoints/best.keras \
+	--parity-batch logs/<run>/parity_batch.npz \
 	--output-dir v2/hls4ml/test_run
 ```
 
 ## Outputs
 
-- `v2/exports/`: trained model, parity batch, training history, validation metrics, and predicted disparity artifacts
-- `v2/data/manifests/`: sampled dataset manifests used for a run
-- `v2/hls4ml/`: conversion config and parity metrics
+- `logs/<run>/`: checkpoints, manifests, training history, parity batch, metrics, and final model
+- `v2/hls4ml/<run>/`: conversion config, feature-extractor model, and parity metrics
 
 ## Current dataset path
 
-- KITTI fine-tune/eval: `UniflexAI/mini_kitti`
-- Scene Flow pretrain: `olivermao/sceneflow`
+- Scene Flow synthetic training: `olivermao/sceneflow`
+- KITTI validation: `UniflexAI/mini_kitti`
+- DrivingStereo local root: `v2/data/raw/driving_stereo`
+- KITTI 2015 local root: `v2/data/raw/kitti2015`
+- KITTI 2012 local root: `v2/data/raw/kitti2012`
 
-The KITTI path is fully validated in this workspace. The Scene Flow loader is implemented against the Hugging Face tar archive layout and is ready for larger pretraining runs.
+The smoke training path is validated in this workspace. Scene Flow streaming and mixed-manifest loading are implemented and ready for larger runs once local datasets finish downloading and extracting.

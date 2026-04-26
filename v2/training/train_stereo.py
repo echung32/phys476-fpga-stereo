@@ -29,7 +29,7 @@ os.environ.setdefault("KERAS_BACKEND", "torch")
 import keras
 import numpy as np
 
-from v2.models.keras_student import build_correlation_student, _masked_smooth_l1, _mean_abs_error_valid
+from v2.models.keras_student import build_correlation_student
 from v2.training.augmentation import AugmentConfig, augment, centre_crop_pad
 from v2.training.hf_utils import resolve_repo_path
 from v2.training.stereo_data import (
@@ -42,7 +42,6 @@ from v2.training.stereo_data import (
     iter_manifest_chunks,
     load_kitti_hf_examples,
     write_manifest,
-    load_manifest,
 )
 
 
@@ -187,6 +186,30 @@ def _evaluate(
         return_dict=True,
     )
     return {k: float(v) for k, v in result.items()}
+
+
+def _save_parity_batch(
+    path: Path,
+    examples: list[StereoExample],
+    *,
+    config: TrainConfig,
+    rng: np.random.Generator,
+) -> None:
+    left_batch, right_batch, y_true_batch = _prepare_inputs(
+        examples,
+        target_h=config.target_height,
+        target_w=config.target_width,
+        max_disp=config.max_disp,
+        aug_config=None,
+        rng=rng,
+    )
+    np.savez_compressed(
+        path,
+        left=left_batch,
+        right=right_batch,
+        images=left_batch,
+        y_true=y_true_batch,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -420,6 +443,27 @@ def main() -> None:
     # Final artefacts
     (run_dir / "training_history.json").write_text(
         json.dumps(training_log, indent=2), encoding="utf-8"
+    )
+    _save_parity_batch(
+        run_dir / "parity_batch.npz",
+        val_examples[: min(8, len(val_examples))],
+        config=config,
+        rng=np.random.default_rng(config.seed),
+    )
+    final_metrics = {
+        "best_val_mae": best_val_mae,
+        "last_epoch": training_log[-1] if training_log else None,
+        "train_examples": len(mixed_manifest),
+        "validation_examples": len(val_examples),
+        "artifacts": {
+            "best_checkpoint": str(ckpt_dir / "best.keras"),
+            "latest_checkpoint": str(ckpt_dir / "latest.keras"),
+            "parity_batch": str(run_dir / "parity_batch.npz"),
+            "student_model": str(run_dir / "student_model.keras"),
+        },
+    }
+    (run_dir / "metrics.json").write_text(
+        json.dumps(final_metrics, indent=2), encoding="utf-8"
     )
     model.save(str(run_dir / "student_model.keras"))
     print(f"\nTraining complete. Best val MAE: {best_val_mae:.4f}", flush=True)

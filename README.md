@@ -3,7 +3,7 @@
 This repository now supports two tracks in parallel:
 
 - `v1`: the existing Verilog stereo baseline, preserved as the hardware-reference path
-- `v2`: a real-data neural stereo pipeline built around a compact Keras student model and hls4ml conversion checks
+- `v2`: a student-only low-resolution correlation stereo pipeline with hls4ml export checks
 
 ## Current layout
 
@@ -20,8 +20,7 @@ phys476/
 │   ├── docs/README.md
 │   ├── hls4ml/convert_student.py
 │   ├── models/keras_student.py
-│   └── training/{hf_utils.py,patch_dataset.py,stereo_data.py,train_real_stereo.py}
-├── NN_MIGRATION_PLAN.md
+│   └── training/{augmentation.py,hf_utils.py,stereo_data.py,train_stereo.py}
 ├── REPORT.md
 └── pyproject.toml                        uv-managed Python project
 ```
@@ -52,40 +51,51 @@ uv run python v1/plot_depth.py --depth output/depth_out.hex --gt data/gt_dispari
 
 ## v2 real-data neural pipeline
 
-The primary `v2` path now trains on real stereo images and disparity labels from Hugging Face datasets. The student model is a native Keras patch matcher that keeps the hardware-facing 5x5 patch plus 16-candidate disparity search assumption, while using a software inference loop to reconstruct a full disparity map.
+The primary `v2` path is now teacher-free. It trains a low-resolution full-frame correlation student directly from ground-truth disparity using mixed stereo datasets.
 
-Default datasets:
+Default data sources:
 
-- Scene Flow pretraining source: `olivermao/sceneflow`
-- KITTI fine-tune and evaluation source: `UniflexAI/mini_kitti`
+- Scene Flow synthetic source: `olivermao/sceneflow`
+- KITTI validation source: `UniflexAI/mini_kitti`
+- DrivingStereo and KITTI 2012/2015 local-disk adapters for larger mixed runs
 
-Run a minimal end-to-end real-data training pass:
+Run a minimal end-to-end smoke pass:
 
 ```bash
-KERAS_BACKEND=torch uv run python -m v2.training.train_real_stereo \
-    --pretrain-max-examples 0 \
-    --finetune-max-examples 2 \
-    --validation-max-examples 1 \
-    --max-positions-per-image 64 \
-    --finetune-epochs 1 \
-    --batch-size 64 \
-    --output-dir v2/exports/test_run \
-    --manifest-dir v2/data/manifests/test_run
+KERAS_BACKEND=torch uv run python -m v2.training.train_stereo \
+    --run-name smoke_correlation \
+    --epochs 2 \
+    --batch-size 2 \
+    --chunk-size 8 \
+    --sceneflow-limit 24 \
+    --val-limit 4 \
+    --no-augment
 ```
 
-Convert the trained Keras student with hls4ml and run software parity checks:
+Run a mixed-data training pass once local datasets are ready:
+
+```bash
+bash v2/data/setup_datasets.sh
+KERAS_BACKEND=torch CUDA_VISIBLE_DEVICES=0 uv run python -m v2.training.train_stereo \
+    --run-name full_mixed \
+    --driving-stereo-dir v2/data/raw/driving_stereo \
+    --kitti2015-dir v2/data/raw/kitti2015 \
+    --kitti2012-dir v2/data/raw/kitti2012
+```
+
+Convert the trained student feature extractor with hls4ml and run parity checks:
 
 ```bash
 KERAS_BACKEND=torch uv run python -m v2.hls4ml.convert_student \
-    --model v2/exports/test_run/student_patch_model.keras \
-    --parity-batch v2/exports/test_run/parity_batch.npz \
+    --model logs/<run>/checkpoints/best.keras \
+    --parity-batch logs/<run>/parity_batch.npz \
     --output-dir v2/hls4ml/test_run
 ```
 
 Outputs:
 
-- `v2/exports/*`: trained Keras model, manifests, validation metrics, parity batch, and validation visualizations
-- `v2/hls4ml/*`: generated hls4ml config and software parity metrics
+- `logs/*`: run config, manifests, checkpoints, training history, metrics, and parity batch
+- `v2/hls4ml/*`: generated hls4ml config, extracted feature-extractor model, and parity metrics
 
 ## Verilog baseline references
 
