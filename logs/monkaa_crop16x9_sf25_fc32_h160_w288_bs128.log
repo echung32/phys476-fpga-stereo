@@ -1,0 +1,1030 @@
+[launcher] 2026-04-29T11:52:40-10:00 run_name=monkaa_crop16x9_sf25_fc32_h160_w288_bs128 gpu=0 batch_size=128 learning_rate=3e-4 epochs=16 train_epoch_size=32768 chunk_size=1024
+[launcher] command: env KERAS_BACKEND=torch CUDA_VISIBLE_DEVICES=0 uv run python -m v2.training.train_stereo --run-name monkaa_crop16x9_sf25_fc32_h160_w288_bs128 --output-dir /home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128 --driving-stereo-dir v2/data/raw/driving_stereo --kitti2015-dir v2/data/raw/kitti2015 --kitti2012-dir v2/data/raw/kitti2012 --epochs 16 --batch-size 128 --learning-rate 3e-4 --chunk-size 1024 --train-epoch-size 32768 --val-limit 0 --driving-holdout-limit 1024 --sceneflow-dataset v2/data/raw/sceneflow/monkaa --feature-channels 32 --target-height 160 --target-width 288 --input-fit-mode crop --max-disp 64 --sceneflow-frac 0.25 --driving-stereo-frac 0.55 --kitti-frac 0.20 --loader-workers 12
+[monitor] 2026-04-29T11:52:40-10:00 started gpu=0 interval=30s
+[monitor] 2026-04-29T11:52:40-10:00 gpu=0 batch_size=128 mem_used_mb=9561 mem_free_mb=87690 util_gpu=97 util_mem=65 last_csv=pending
+Run directory: /home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128
+Model: "correlation_student"
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)        ┃ Output Shape      ┃    Param # ┃ Connected to      ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+│ left (InputLayer)   │ (None, 160, 288,  │          0 │ -                 │
+│                     │ 1)                │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ right (InputLayer)  │ (None, 160, 288,  │          0 │ -                 │
+│                     │ 1)                │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ feat_conv1 (Conv2D) │ (None, 160, 288,  │        320 │ left[0][0],       │
+│                     │ 32)               │            │ right[0][0]       │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ feat_conv2 (Conv2D) │ (None, 160, 288,  │      9,248 │ feat_conv1[0][0], │
+│                     │ 32)               │            │ feat_conv1[1][0]  │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ feat_conv3 (Conv2D) │ (None, 160, 288,  │      4,624 │ feat_conv2[0][0], │
+│                     │ 16)               │            │ feat_conv2[1][0]  │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ cost_volume         │ (None, 160, 288,  │          0 │ feat_conv3[0][0], │
+│ (CorrelationCostVo… │ 64)               │            │ feat_conv3[1][0]  │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ disp_conv1 (Conv2D) │ (None, 160, 288,  │     36,928 │ cost_volume[0][0] │
+│                     │ 64)               │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ disp_conv2 (Conv2D) │ (None, 160, 288,  │     18,464 │ disp_conv1[0][0]  │
+│                     │ 32)               │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ disp_logits         │ (None, 160, 288,  │      2,112 │ disp_conv2[0][0]  │
+│ (Conv2D)            │ 64)               │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ disp_softmax        │ (None, 160, 288,  │          0 │ disp_logits[0][0] │
+│ (Softmax)           │ 64)               │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ multiply (Multiply) │ (None, 160, 288,  │          0 │ disp_softmax[0][… │
+│                     │ 64)               │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ sum (Sum)           │ (None, 160, 288,  │          0 │ multiply[0][0]    │
+│                     │ 1)                │            │                   │
+└─────────────────────┴───────────────────┴────────────┴───────────────────┘
+ Total params: 71,696 (280.06 KB)
+ Trainable params: 71,696 (280.06 KB)
+ Non-trainable params: 0 (0.00 B)
+
+Building manifests …
+  SceneFlow: 8664 entries
+  DrivingStereo: 174437 entries
+  KITTI 2015: 200 entries
+  KITTI 2012: 194 entries
+Loading external validation examples …
+  External validation: 88 examples
+  Driving holdout validation: 1024 examples
+[monitor] 2026-04-29T11:53:10-10:00 gpu=0 batch_size=128 mem_used_mb=10226 mem_free_mb=87025 util_gpu=93 util_mem=62 last_csv=pending
+  Scene Flow holdout validation: 1024 examples
+  DrivingStereo train pool: 173413 examples
+  Scene Flow train pool: 7640 examples
+
+=== Epoch 1/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T11:53:40-10:00 gpu=0 batch_size=128 mem_used_mb=10226 mem_free_mb=87025 util_gpu=97 util_mem=65 last_csv=pending
+  chunk    1  examples   1024  loss 19.3908  mae 19.8896
+[monitor] 2026-04-29T11:54:10-10:00 gpu=0 batch_size=128 mem_used_mb=75456 mem_free_mb=21795 util_gpu=97 util_mem=62 last_csv=pending
+  chunk    2  examples   2048  loss 19.3331  mae 19.8320
+[monitor] 2026-04-29T11:54:40-10:00 gpu=0 batch_size=128 mem_used_mb=75456 mem_free_mb=21795 util_gpu=97 util_mem=65 last_csv=pending
+  chunk    3  examples   3072  loss 18.2156  mae 18.7142
+[monitor] 2026-04-29T11:55:10-10:00 gpu=0 batch_size=128 mem_used_mb=75456 mem_free_mb=21795 util_gpu=99 util_mem=67 last_csv=pending
+  chunk    4  examples   4096  loss 14.9429  mae 15.4390
+  chunk    5  examples   5120  loss 9.4590  mae 9.9491
+[monitor] 2026-04-29T11:55:40-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=93 util_mem=59 last_csv=pending
+  chunk    6  examples   6144  loss 8.3587  mae 8.8474
+[monitor] 2026-04-29T11:56:10-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=88 util_mem=50 last_csv=pending
+  chunk    7  examples   7168  loss 7.9128  mae 8.4001
+[monitor] 2026-04-29T11:56:40-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=95 util_mem=62 last_csv=pending
+  chunk    8  examples   8192  loss 7.7017  mae 8.1886
+[monitor] 2026-04-29T11:57:10-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=99 util_mem=76 last_csv=pending
+  chunk    9  examples   9216  loss 7.7272  mae 8.2141
+[monitor] 2026-04-29T11:57:40-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=98 util_mem=68 last_csv=pending
+  chunk   10  examples  10240  loss 7.4913  mae 7.9775
+[monitor] 2026-04-29T11:58:10-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=98 util_mem=77 last_csv=pending
+  chunk   11  examples  11264  loss 7.8140  mae 8.3005
+  chunk   12  examples  12288  loss 7.5476  mae 8.0341
+[monitor] 2026-04-29T11:58:40-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=93 util_mem=56 last_csv=pending
+  chunk   13  examples  13312  loss 7.2386  mae 7.7243
+[monitor] 2026-04-29T11:59:10-10:00 gpu=0 batch_size=128 mem_used_mb=78342 mem_free_mb=18909 util_gpu=98 util_mem=68 last_csv=pending
+  chunk   14  examples  14336  loss 7.1000  mae 7.5861
+[monitor] 2026-04-29T11:59:40-10:00 gpu=0 batch_size=128 mem_used_mb=81228 mem_free_mb=16023 util_gpu=99 util_mem=85 last_csv=pending
+  chunk   15  examples  15360  loss 7.8756  mae 8.3626
+  chunk   16  examples  16384  loss 7.5907  mae 8.0773
+[monitor] 2026-04-29T12:00:10-10:00 gpu=0 batch_size=128 mem_used_mb=81228 mem_free_mb=16023 util_gpu=96 util_mem=59 last_csv=pending
+  chunk   17  examples  17408  loss 7.3158  mae 7.8021
+[monitor] 2026-04-29T12:00:40-10:00 gpu=0 batch_size=128 mem_used_mb=84114 mem_free_mb=13137 util_gpu=98 util_mem=77 last_csv=pending
+  chunk   18  examples  18432  loss 7.3867  mae 7.8724
+  chunk   19  examples  19456  loss 7.4933  mae 7.9792
+[monitor] 2026-04-29T12:01:10-10:00 gpu=0 batch_size=128 mem_used_mb=84114 mem_free_mb=13137 util_gpu=94 util_mem=62 last_csv=pending
+  chunk   20  examples  20480  loss 7.4090  mae 7.8960
+[monitor] 2026-04-29T12:01:40-10:00 gpu=0 batch_size=128 mem_used_mb=87000 mem_free_mb=10251 util_gpu=98 util_mem=51 last_csv=pending
+  chunk   21  examples  21504  loss 7.2641  mae 7.7497
+  chunk   22  examples  22528  loss 7.5178  mae 8.0036
+[monitor] 2026-04-29T12:02:11-10:00 gpu=0 batch_size=128 mem_used_mb=87000 mem_free_mb=10251 util_gpu=96 util_mem=63 last_csv=pending
+  chunk   23  examples  23552  loss 7.3083  mae 7.7944
+[monitor] 2026-04-29T12:02:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=73 last_csv=pending
+  chunk   24  examples  24576  loss 7.0496  mae 7.5361
+[monitor] 2026-04-29T12:03:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=60 last_csv=pending
+  chunk   25  examples  25600  loss 7.7070  mae 8.1932
+  chunk   26  examples  26624  loss 7.6226  mae 8.1094
+[monitor] 2026-04-29T12:03:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=92 util_mem=63 last_csv=pending
+  chunk   27  examples  27648  loss 7.2610  mae 7.7478
+[monitor] 2026-04-29T12:04:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=60 last_csv=pending
+  chunk   28  examples  28672  loss 7.4230  mae 7.9095
+[monitor] 2026-04-29T12:04:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=79 last_csv=pending
+  chunk   29  examples  29696  loss 7.5793  mae 8.0653
+[monitor] 2026-04-29T12:05:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=69 last_csv=pending
+  chunk   30  examples  30720  loss 7.6338  mae 8.1204
+  chunk   31  examples  31744  loss 7.5521  mae 8.0384
+[monitor] 2026-04-29T12:05:41-10:00 gpu=0 batch_size=128 mem_used_mb=92845 mem_free_mb=4406 util_gpu=95 util_mem=63 last_csv=pending
+  chunk   32  examples  32768  loss 7.3660  mae 7.8525
+[monitor] 2026-04-29T12:06:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=59 last_csv=pending
+  Epoch 1 summary  train_loss=8.8934  train_mae=9.3815  val_mae=7.4293  driving_holdout_mae=6.0062  sceneflow_holdout_mae=9.2689
+  ** New best val MAE: 7.4293 — saved best.keras **
+
+=== Epoch 2/16 ===
+  Mixed train: 32768 entries
+  chunk    1  examples   1024  loss 7.5112  mae 7.9987
+[monitor] 2026-04-29T12:06:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=62 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk    2  examples   2048  loss 7.8428  mae 8.3302
+[monitor] 2026-04-29T12:07:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=82 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk    3  examples   3072  loss 7.3538  mae 7.8402
+[monitor] 2026-04-29T12:07:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=52 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk    4  examples   4096  loss 7.1327  mae 7.6189
+  chunk    5  examples   5120  loss 7.5247  mae 8.0114
+[monitor] 2026-04-29T12:08:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=52 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk    6  examples   6144  loss 7.6022  mae 8.0890
+[monitor] 2026-04-29T12:08:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=64 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk    7  examples   7168  loss 7.2672  mae 7.7537
+  chunk    8  examples   8192  loss 6.9630  mae 7.4482
+[monitor] 2026-04-29T12:09:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=65 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk    9  examples   9216  loss 7.5331  mae 8.0209
+[monitor] 2026-04-29T12:09:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=67 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   10  examples  10240  loss 7.0448  mae 7.5313
+  chunk   11  examples  11264  loss 7.2493  mae 7.7353
+[monitor] 2026-04-29T12:10:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=88 util_mem=55 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   12  examples  12288  loss 7.5600  mae 8.0470
+[monitor] 2026-04-29T12:10:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=65 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   13  examples  13312  loss 6.7799  mae 7.2654
+[monitor] 2026-04-29T12:11:11-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=64 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   14  examples  14336  loss 7.6120  mae 8.0992
+[monitor] 2026-04-29T12:11:41-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=66 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   15  examples  15360  loss 7.0574  mae 7.5429
+  chunk   16  examples  16384  loss 7.3221  mae 7.8081
+[monitor] 2026-04-29T12:12:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=63 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   17  examples  17408  loss 7.4151  mae 7.9021
+[monitor] 2026-04-29T12:12:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=57 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   18  examples  18432  loss 7.3682  mae 7.8544
+[monitor] 2026-04-29T12:13:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=79 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   19  examples  19456  loss 7.2581  mae 7.7446
+  chunk   20  examples  20480  loss 7.3622  mae 7.8479
+[monitor] 2026-04-29T12:13:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=65 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   21  examples  21504  loss 7.2470  mae 7.7333
+[monitor] 2026-04-29T12:14:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=69 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   22  examples  22528  loss 7.3992  mae 7.8855
+  chunk   23  examples  23552  loss 7.3069  mae 7.7930
+[monitor] 2026-04-29T12:14:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=63 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   24  examples  24576  loss 7.2718  mae 7.7583
+[monitor] 2026-04-29T12:15:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=85 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   25  examples  25600  loss 7.2292  mae 7.7157
+  chunk   26  examples  26624  loss 7.1483  mae 7.6343
+[monitor] 2026-04-29T12:15:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=92 util_mem=56 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   27  examples  27648  loss 7.5862  mae 8.0733
+[monitor] 2026-04-29T12:16:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=75 util_mem=49 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   28  examples  28672  loss 7.3899  mae 7.8766
+[monitor] 2026-04-29T12:16:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=65 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   29  examples  29696  loss 7.1980  mae 7.6848
+[monitor] 2026-04-29T12:17:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=83 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   30  examples  30720  loss 7.4871  mae 7.9739
+  chunk   31  examples  31744  loss 7.6434  mae 8.1298
+[monitor] 2026-04-29T12:17:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=92 util_mem=60 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  chunk   32  examples  32768  loss 7.3442  mae 7.8309
+[monitor] 2026-04-29T12:18:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=62 last_csv=1,8.893406242132187,9.381450831890106,6.9391703605651855,7.429328441619873,5.521380424499512,6.0061821937561035,8.780573844909668,9.26888656616211
+  Epoch 2 summary  train_loss=7.3441  train_mae=7.8306  val_mae=7.1177  driving_holdout_mae=6.0261  sceneflow_holdout_mae=9.1782
+  ** New best val MAE: 7.1177 — saved best.keras **
+
+=== Epoch 3/16 ===
+  Mixed train: 32768 entries
+  chunk    1  examples   1024  loss 7.5063  mae 7.9940
+[monitor] 2026-04-29T12:18:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=63 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk    2  examples   2048  loss 7.3807  mae 7.8676
+[monitor] 2026-04-29T12:19:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=75 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk    3  examples   3072  loss 7.5817  mae 8.0687
+  chunk    4  examples   4096  loss 7.7042  mae 8.1909
+[monitor] 2026-04-29T12:19:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=84 util_mem=52 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk    5  examples   5120  loss 7.6244  mae 8.1113
+[monitor] 2026-04-29T12:20:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=92 util_mem=56 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk    6  examples   6144  loss 7.1302  mae 7.6167
+[monitor] 2026-04-29T12:20:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=64 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk    7  examples   7168  loss 7.4360  mae 7.9232
+[monitor] 2026-04-29T12:21:12-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=78 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk    8  examples   8192  loss 7.3276  mae 7.8148
+  chunk    9  examples   9216  loss 7.3174  mae 7.8038
+[monitor] 2026-04-29T12:21:42-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=60 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   10  examples  10240  loss 7.4059  mae 7.8933
+[monitor] 2026-04-29T12:22:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=63 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   11  examples  11264  loss 7.1722  mae 7.6589
+[monitor] 2026-04-29T12:22:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=79 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   12  examples  12288  loss 7.3645  mae 7.8508
+  chunk   13  examples  13312  loss 7.0434  mae 7.5291
+[monitor] 2026-04-29T12:23:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=62 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   14  examples  14336  loss 7.4140  mae 7.9003
+[monitor] 2026-04-29T12:23:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=69 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   15  examples  15360  loss 7.3249  mae 7.8116
+  chunk   16  examples  16384  loss 6.9731  mae 7.4590
+[monitor] 2026-04-29T12:24:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=59 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   17  examples  17408  loss 7.2024  mae 7.6890
+[monitor] 2026-04-29T12:24:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=57 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   18  examples  18432  loss 7.2955  mae 7.7829
+[monitor] 2026-04-29T12:25:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=62 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   19  examples  19456  loss 7.5524  mae 8.0388
+  chunk   20  examples  20480  loss 7.1144  mae 7.6008
+[monitor] 2026-04-29T12:25:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=57 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   21  examples  21504  loss 7.2402  mae 7.7261
+[monitor] 2026-04-29T12:26:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=59 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   22  examples  22528  loss 7.2881  mae 7.7744
+[monitor] 2026-04-29T12:26:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=79 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   23  examples  23552  loss 6.8861  mae 7.3719
+[monitor] 2026-04-29T12:27:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=69 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   24  examples  24576  loss 7.1080  mae 7.5944
+  chunk   25  examples  25600  loss 6.8450  mae 7.3303
+[monitor] 2026-04-29T12:27:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=60 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   26  examples  26624  loss 6.8414  mae 7.3272
+[monitor] 2026-04-29T12:28:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=86 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   27  examples  27648  loss 7.0482  mae 7.5331
+  chunk   28  examples  28672  loss 7.4676  mae 7.9539
+[monitor] 2026-04-29T12:28:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=64 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   29  examples  29696  loss 6.9604  mae 7.4466
+[monitor] 2026-04-29T12:29:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=84 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   30  examples  30720  loss 7.6452  mae 8.1319
+[monitor] 2026-04-29T12:29:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=66 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  chunk   31  examples  31744  loss 7.1160  mae 7.6019
+  chunk   32  examples  32768  loss 6.7465  mae 7.2319
+[monitor] 2026-04-29T12:30:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=79 last_csv=2,7.34408238530159,7.8305890411138535,6.62867546081543,7.117703437805176,5.542219161987305,6.0261311531066895,8.689545631408691,9.178215026855469
+  Epoch 3 summary  train_loss=7.2520  train_mae=7.7384  val_mae=7.1250  driving_holdout_mae=5.7626  sceneflow_holdout_mae=9.1271
+
+=== Epoch 4/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T12:30:43-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=74 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk    1  examples   1024  loss 7.1825  mae 7.6690
+  chunk    2  examples   2048  loss 7.3145  mae 7.8007
+[monitor] 2026-04-29T12:31:13-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=63 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk    3  examples   3072  loss 7.1176  mae 7.6025
+[monitor] 2026-04-29T12:31:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=66 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk    4  examples   4096  loss 7.2573  mae 7.7431
+[monitor] 2026-04-29T12:32:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=80 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk    5  examples   5120  loss 7.1648  mae 7.6508
+  chunk    6  examples   6144  loss 7.0749  mae 7.5608
+[monitor] 2026-04-29T12:32:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=61 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk    7  examples   7168  loss 7.0363  mae 7.5215
+[monitor] 2026-04-29T12:33:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=70 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk    8  examples   8192  loss 7.2204  mae 7.7057
+[monitor] 2026-04-29T12:33:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=71 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk    9  examples   9216  loss 6.9654  mae 7.4514
+  chunk   10  examples  10240  loss 7.0461  mae 7.5312
+[monitor] 2026-04-29T12:34:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=61 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   11  examples  11264  loss 6.9168  mae 7.4028
+[monitor] 2026-04-29T12:34:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=69 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   12  examples  12288  loss 7.3689  mae 7.8549
+[monitor] 2026-04-29T12:35:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=82 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   13  examples  13312  loss 7.1919  mae 7.6776
+  chunk   14  examples  14336  loss 6.9439  mae 7.4299
+[monitor] 2026-04-29T12:35:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=65 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   15  examples  15360  loss 7.1863  mae 7.6723
+[monitor] 2026-04-29T12:36:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=61 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   16  examples  16384  loss 6.7153  mae 7.2012
+  chunk   17  examples  17408  loss 7.0772  mae 7.5621
+[monitor] 2026-04-29T12:36:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=56 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   18  examples  18432  loss 7.0661  mae 7.5512
+[monitor] 2026-04-29T12:37:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=70 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   19  examples  19456  loss 7.1254  mae 7.6108
+  chunk   20  examples  20480  loss 7.2484  mae 7.7344
+[monitor] 2026-04-29T12:37:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=92 util_mem=58 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   21  examples  21504  loss 7.3098  mae 7.7955
+[monitor] 2026-04-29T12:38:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=61 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   22  examples  22528  loss 7.0615  mae 7.5465
+[monitor] 2026-04-29T12:38:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=82 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   23  examples  23552  loss 7.0613  mae 7.5468
+[monitor] 2026-04-29T12:39:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=83 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   24  examples  24576  loss 6.9463  mae 7.4328
+  chunk   25  examples  25600  loss 7.4026  mae 7.8885
+[monitor] 2026-04-29T12:39:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=60 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   26  examples  26624  loss 7.0655  mae 7.5513
+[monitor] 2026-04-29T12:40:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=60 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   27  examples  27648  loss 7.0584  mae 7.5442
+  chunk   28  examples  28672  loss 6.9323  mae 7.4172
+[monitor] 2026-04-29T12:40:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=57 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   29  examples  29696  loss 7.1494  mae 7.6345
+[monitor] 2026-04-29T12:41:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=80 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   30  examples  30720  loss 6.9757  mae 7.4611
+[monitor] 2026-04-29T12:41:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=85 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  chunk   31  examples  31744  loss 7.2122  mae 7.6976
+  chunk   32  examples  32768  loss 7.1991  mae 7.6856
+[monitor] 2026-04-29T12:42:14-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=57 last_csv=3,7.251996234059334,7.738395377993584,6.638583183288574,7.124954700469971,5.279665470123291,5.762617111206055,8.638540267944336,9.12705135345459
+  Epoch 4 summary  train_loss=7.1123  train_mae=7.5980  val_mae=6.5164  driving_holdout_mae=5.9526  sceneflow_holdout_mae=8.8401
+  ** New best val MAE: 6.5164 — saved best.keras **
+
+=== Epoch 5/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T12:42:44-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=70 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk    1  examples   1024  loss 6.9721  mae 7.4588
+  chunk    2  examples   2048  loss 7.1376  mae 7.6230
+[monitor] 2026-04-29T12:43:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=58 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk    3  examples   3072  loss 6.8621  mae 7.3465
+[monitor] 2026-04-29T12:43:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=86 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk    4  examples   4096  loss 6.8978  mae 7.3832
+[monitor] 2026-04-29T12:44:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=81 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk    5  examples   5120  loss 7.0342  mae 7.5197
+  chunk    6  examples   6144  loss 7.4842  mae 7.9697
+[monitor] 2026-04-29T12:44:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=76 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk    7  examples   7168  loss 7.2368  mae 7.7228
+[monitor] 2026-04-29T12:45:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=82 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk    8  examples   8192  loss 7.3972  mae 7.8824
+  chunk    9  examples   9216  loss 7.1991  mae 7.6849
+[monitor] 2026-04-29T12:45:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=62 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   10  examples  10240  loss 7.0678  mae 7.5531
+[monitor] 2026-04-29T12:46:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=86 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   11  examples  11264  loss 7.1619  mae 7.6470
+  chunk   12  examples  12288  loss 7.3276  mae 7.8127
+[monitor] 2026-04-29T12:46:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=59 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   13  examples  13312  loss 7.0873  mae 7.5725
+[monitor] 2026-04-29T12:47:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=91 util_mem=58 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   14  examples  14336  loss 7.2337  mae 7.7189
+[monitor] 2026-04-29T12:47:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=49 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   15  examples  15360  loss 7.1322  mae 7.6179
+[monitor] 2026-04-29T12:48:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=76 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   16  examples  16384  loss 7.0982  mae 7.5836
+  chunk   17  examples  17408  loss 6.8353  mae 7.3208
+[monitor] 2026-04-29T12:48:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=63 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   18  examples  18432  loss 7.1961  mae 7.6816
+[monitor] 2026-04-29T12:49:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=69 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   19  examples  19456  loss 7.4012  mae 7.8861
+[monitor] 2026-04-29T12:49:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=82 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   20  examples  20480  loss 7.2118  mae 7.6973
+  chunk   21  examples  21504  loss 7.2383  mae 7.7236
+[monitor] 2026-04-29T12:50:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=61 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   22  examples  22528  loss 6.9570  mae 7.4425
+[monitor] 2026-04-29T12:50:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=75 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   23  examples  23552  loss 7.3025  mae 7.7884
+  chunk   24  examples  24576  loss 6.8350  mae 7.3202
+[monitor] 2026-04-29T12:51:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=60 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   25  examples  25600  loss 7.2219  mae 7.7074
+[monitor] 2026-04-29T12:51:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=82 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   26  examples  26624  loss 7.2979  mae 7.7836
+  chunk   27  examples  27648  loss 7.3632  mae 7.8488
+[monitor] 2026-04-29T12:52:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=82 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   28  examples  28672  loss 7.1334  mae 7.6194
+[monitor] 2026-04-29T12:52:45-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=69 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   29  examples  29696  loss 6.7827  mae 7.2671
+  chunk   30  examples  30720  loss 6.8134  mae 7.2988
+[monitor] 2026-04-29T12:53:15-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=57 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   31  examples  31744  loss 7.3683  mae 7.8541
+[monitor] 2026-04-29T12:53:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=77 last_csv=4,7.112322852015495,7.597986251115799,6.031673908233643,6.516429901123047,5.470106601715088,5.952610015869141,8.35139274597168,8.840123176574707
+  chunk   32  examples  32768  loss 6.8995  mae 7.3841
+  Epoch 5 summary  train_loss=7.1309  train_mae=7.6163  val_mae=6.6565  driving_holdout_mae=5.7874  sceneflow_holdout_mae=8.8636
+
+=== Epoch 6/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T12:54:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=59 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk    1  examples   1024  loss 7.1200  mae 7.6045
+[monitor] 2026-04-29T12:54:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=65 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk    2  examples   2048  loss 7.1716  mae 7.6566
+  chunk    3  examples   3072  loss 6.8619  mae 7.3474
+[monitor] 2026-04-29T12:55:16-10:00 gpu=0 batch_size=128 mem_used_mb=89900 mem_free_mb=7351 util_gpu=97 util_mem=64 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk    4  examples   4096  loss 7.1857  mae 7.6714
+[monitor] 2026-04-29T12:55:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=64 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk    5  examples   5120  loss 7.0546  mae 7.5399
+[monitor] 2026-04-29T12:56:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=71 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk    6  examples   6144  loss 7.0292  mae 7.5152
+  chunk    7  examples   7168  loss 6.7596  mae 7.2444
+[monitor] 2026-04-29T12:56:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=64 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk    8  examples   8192  loss 6.9546  mae 7.4395
+[monitor] 2026-04-29T12:57:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=76 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk    9  examples   9216  loss 7.0829  mae 7.5679
+  chunk   10  examples  10240  loss 7.1582  mae 7.6446
+[monitor] 2026-04-29T12:57:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=58 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   11  examples  11264  loss 7.2326  mae 7.7179
+[monitor] 2026-04-29T12:58:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=78 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   12  examples  12288  loss 7.0574  mae 7.5427
+[monitor] 2026-04-29T12:58:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=55 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   13  examples  13312  loss 7.1325  mae 7.6182
+  chunk   14  examples  14336  loss 6.8382  mae 7.3231
+[monitor] 2026-04-29T12:59:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=63 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   15  examples  15360  loss 6.8698  mae 7.3550
+[monitor] 2026-04-29T12:59:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=79 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   16  examples  16384  loss 6.8386  mae 7.3227
+  chunk   17  examples  17408  loss 6.7163  mae 7.2016
+[monitor] 2026-04-29T13:00:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=56 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   18  examples  18432  loss 6.9599  mae 7.4445
+[monitor] 2026-04-29T13:00:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=79 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   19  examples  19456  loss 7.0242  mae 7.5095
+[monitor] 2026-04-29T13:01:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=86 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   20  examples  20480  loss 7.1308  mae 7.6156
+  chunk   21  examples  21504  loss 7.0897  mae 7.5746
+[monitor] 2026-04-29T13:01:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=62 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   22  examples  22528  loss 6.8489  mae 7.3341
+[monitor] 2026-04-29T13:02:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=76 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   23  examples  23552  loss 7.0885  mae 7.5737
+  chunk   24  examples  24576  loss 6.5848  mae 7.0687
+[monitor] 2026-04-29T13:02:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=63 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   25  examples  25600  loss 7.1469  mae 7.6321
+[monitor] 2026-04-29T13:03:16-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=63 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   26  examples  26624  loss 6.9766  mae 7.4614
+[monitor] 2026-04-29T13:03:46-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=88 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   27  examples  27648  loss 7.2168  mae 7.7013
+  chunk   28  examples  28672  loss 6.5771  mae 7.0614
+[monitor] 2026-04-29T13:04:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=60 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   29  examples  29696  loss 6.8533  mae 7.3376
+[monitor] 2026-04-29T13:04:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=59 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   30  examples  30720  loss 6.7680  mae 7.2525
+[monitor] 2026-04-29T13:05:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=60 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  chunk   31  examples  31744  loss 6.7679  mae 7.2520
+  chunk   32  examples  32768  loss 7.0885  mae 7.5735
+[monitor] 2026-04-29T13:05:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=63 last_csv=5,7.130859136581421,7.616270378232002,6.171627521514893,6.656459331512451,5.305501461029053,5.787384510040283,8.375699996948242,8.863574028015137
+  Epoch 6 summary  train_loss=6.9746  train_mae=7.4595  val_mae=6.8913  driving_holdout_mae=5.6566  sceneflow_holdout_mae=8.8965
+
+=== Epoch 7/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T13:06:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=49 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk    1  examples   1024  loss 6.9358  mae 7.4207
+  chunk    2  examples   2048  loss 7.1606  mae 7.6454
+[monitor] 2026-04-29T13:06:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=62 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk    3  examples   3072  loss 7.1515  mae 7.6363
+[monitor] 2026-04-29T13:07:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=68 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk    4  examples   4096  loss 7.1569  mae 7.6420
+[monitor] 2026-04-29T13:07:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=78 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk    5  examples   5120  loss 6.7401  mae 7.2237
+  chunk    6  examples   6144  loss 6.8049  mae 7.2894
+[monitor] 2026-04-29T13:08:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=55 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk    7  examples   7168  loss 6.9950  mae 7.4793
+[monitor] 2026-04-29T13:08:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=83 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk    8  examples   8192  loss 7.2780  mae 7.7626
+  chunk    9  examples   9216  loss 6.9073  mae 7.3917
+[monitor] 2026-04-29T13:09:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=60 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   10  examples  10240  loss 7.1471  mae 7.6321
+[monitor] 2026-04-29T13:09:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=81 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   11  examples  11264  loss 6.9239  mae 7.4088
+[monitor] 2026-04-29T13:10:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=75 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   12  examples  12288  loss 7.0076  mae 7.4928
+  chunk   13  examples  13312  loss 6.8361  mae 7.3207
+[monitor] 2026-04-29T13:10:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=64 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   14  examples  14336  loss 7.4577  mae 7.9430
+[monitor] 2026-04-29T13:11:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=74 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   15  examples  15360  loss 6.6340  mae 7.1175
+  chunk   16  examples  16384  loss 6.7629  mae 7.2467
+[monitor] 2026-04-29T13:11:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=61 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   17  examples  17408  loss 6.7907  mae 7.2746
+[monitor] 2026-04-29T13:12:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=83 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   18  examples  18432  loss 6.7535  mae 7.2376
+[monitor] 2026-04-29T13:12:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=76 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   19  examples  19456  loss 7.0225  mae 7.5067
+  chunk   20  examples  20480  loss 6.8861  mae 7.3709
+[monitor] 2026-04-29T13:13:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=63 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   21  examples  21504  loss 6.8362  mae 7.3201
+[monitor] 2026-04-29T13:13:47-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=72 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   22  examples  22528  loss 7.1112  mae 7.5956
+  chunk   23  examples  23552  loss 7.2051  mae 7.6897
+[monitor] 2026-04-29T13:14:17-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=91 util_mem=58 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   24  examples  24576  loss 6.9406  mae 7.4244
+[monitor] 2026-04-29T13:14:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=65 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   25  examples  25600  loss 6.6636  mae 7.1472
+[monitor] 2026-04-29T13:15:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=72 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   26  examples  26624  loss 6.8539  mae 7.3380
+  chunk   27  examples  27648  loss 6.4895  mae 6.9726
+[monitor] 2026-04-29T13:15:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=65 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   28  examples  28672  loss 6.8461  mae 7.3295
+[monitor] 2026-04-29T13:16:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=56 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   29  examples  29696  loss 7.1330  mae 7.6169
+  chunk   30  examples  30720  loss 6.9176  mae 7.4014
+[monitor] 2026-04-29T13:16:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=95 util_mem=63 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   31  examples  31744  loss 7.0106  mae 7.4948
+[monitor] 2026-04-29T13:17:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=52 last_csv=6,6.974552422761917,7.459526419639587,6.405914783477783,6.891282081604004,5.175086975097656,5.656609535217285,8.408062934875488,8.896455764770508
+  chunk   32  examples  32768  loss 7.1473  mae 7.6327
+  Epoch 7 summary  train_loss=6.9533  train_mae=7.4377  val_mae=6.5776  driving_holdout_mae=5.5440  sceneflow_holdout_mae=8.6921
+
+=== Epoch 8/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T13:17:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=85 util_mem=59 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk    1  examples   1024  loss 7.0226  mae 7.5068
+[monitor] 2026-04-29T13:18:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=71 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk    2  examples   2048  loss 7.1953  mae 7.6799
+  chunk    3  examples   3072  loss 7.0991  mae 7.5833
+[monitor] 2026-04-29T13:18:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=94 util_mem=59 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk    4  examples   4096  loss 6.7316  mae 7.2153
+[monitor] 2026-04-29T13:19:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=59 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk    5  examples   5120  loss 6.8149  mae 7.2984
+[monitor] 2026-04-29T13:19:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=64 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk    6  examples   6144  loss 6.9231  mae 7.4067
+  chunk    7  examples   7168  loss 6.8960  mae 7.3799
+[monitor] 2026-04-29T13:20:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=64 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk    8  examples   8192  loss 6.8110  mae 7.2943
+[monitor] 2026-04-29T13:20:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=68 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk    9  examples   9216  loss 6.6273  mae 7.1108
+  chunk   10  examples  10240  loss 6.9920  mae 7.4758
+[monitor] 2026-04-29T13:21:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=65 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   11  examples  11264  loss 6.8722  mae 7.3561
+[monitor] 2026-04-29T13:21:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=76 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   12  examples  12288  loss 7.2244  mae 7.7093
+[monitor] 2026-04-29T13:22:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=85 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   13  examples  13312  loss 6.5249  mae 7.0080
+  chunk   14  examples  14336  loss 7.1746  mae 7.6588
+[monitor] 2026-04-29T13:22:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=59 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   15  examples  15360  loss 6.7922  mae 7.2756
+[monitor] 2026-04-29T13:23:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=50 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   16  examples  16384  loss 6.8942  mae 7.3786
+  chunk   17  examples  17408  loss 6.9240  mae 7.4084
+[monitor] 2026-04-29T13:23:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=57 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   18  examples  18432  loss 6.7255  mae 7.2090
+[monitor] 2026-04-29T13:24:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=84 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   19  examples  19456  loss 6.9098  mae 7.3934
+[monitor] 2026-04-29T13:24:48-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=66 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   20  examples  20480  loss 6.9739  mae 7.4574
+  chunk   21  examples  21504  loss 6.6658  mae 7.1491
+[monitor] 2026-04-29T13:25:18-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=93 util_mem=58 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   22  examples  22528  loss 6.9829  mae 7.4672
+[monitor] 2026-04-29T13:25:49-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=68 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   23  examples  23552  loss 6.7819  mae 7.2662
+  chunk   24  examples  24576  loss 6.8722  mae 7.3560
+[monitor] 2026-04-29T13:26:19-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=92 util_mem=60 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   25  examples  25600  loss 6.7222  mae 7.2053
+[monitor] 2026-04-29T13:26:49-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=68 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   26  examples  26624  loss 7.3091  mae 7.7930
+  chunk   27  examples  27648  loss 6.7954  mae 7.2797
+[monitor] 2026-04-29T13:27:19-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=60 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   28  examples  28672  loss 6.9323  mae 7.4164
+[monitor] 2026-04-29T13:27:49-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=98 util_mem=64 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   29  examples  29696  loss 6.9850  mae 7.4686
+[monitor] 2026-04-29T13:28:19-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=75 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   30  examples  30720  loss 6.8887  mae 7.3724
+  chunk   31  examples  31744  loss 6.6932  mae 7.1768
+[monitor] 2026-04-29T13:28:49-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=97 util_mem=64 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  chunk   32  examples  32768  loss 6.6249  mae 7.1078
+[monitor] 2026-04-29T13:29:19-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=99 util_mem=77 last_csv=7,6.953340396285057,7.437664419412613,6.094057083129883,6.577634811401367,5.063317775726318,5.543973922729492,8.205387115478516,8.692094802856445
+  Epoch 8 summary  train_loss=6.8870  train_mae=7.3708  val_mae=6.6671  driving_holdout_mae=5.4374  sceneflow_holdout_mae=8.6958
+
+=== Epoch 9/16 ===
+  Mixed train: 32768 entries
+  chunk    1  examples   1024  loss 6.7005  mae 7.1836
+[monitor] 2026-04-29T13:29:49-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=64 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk    2  examples   2048  loss 6.7979  mae 7.2812
+[monitor] 2026-04-29T13:30:19-10:00 gpu=0 batch_size=128 mem_used_mb=89886 mem_free_mb=7365 util_gpu=96 util_mem=58 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk    3  examples   3072  loss 6.9338  mae 7.4183
+  chunk    4  examples   4096  loss 6.6435  mae 7.1267
+[monitor] 2026-04-29T13:30:49-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=92 util_mem=61 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk    5  examples   5120  loss 6.8217  mae 7.3049
+[monitor] 2026-04-29T13:31:19-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=61 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk    6  examples   6144  loss 7.0364  mae 7.5197
+[monitor] 2026-04-29T13:31:49-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=75 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk    7  examples   7168  loss 6.5858  mae 7.0693
+  chunk    8  examples   8192  loss 6.8659  mae 7.3493
+[monitor] 2026-04-29T13:32:19-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=64 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk    9  examples   9216  loss 7.2221  mae 7.7053
+[monitor] 2026-04-29T13:32:49-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=79 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   10  examples  10240  loss 6.7087  mae 7.1911
+  chunk   11  examples  11264  loss 6.7347  mae 7.2178
+[monitor] 2026-04-29T13:33:19-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=63 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   12  examples  12288  loss 7.2016  mae 7.6852
+[monitor] 2026-04-29T13:33:49-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=67 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   13  examples  13312  loss 6.9717  mae 7.4551
+[monitor] 2026-04-29T13:34:19-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=78 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   14  examples  14336  loss 7.1270  mae 7.6100
+  chunk   15  examples  15360  loss 6.9819  mae 7.4653
+[monitor] 2026-04-29T13:34:49-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=64 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   16  examples  16384  loss 6.4845  mae 6.9670
+[monitor] 2026-04-29T13:35:19-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=72 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   17  examples  17408  loss 6.7096  mae 7.1917
+  chunk   18  examples  18432  loss 6.8440  mae 7.3268
+[monitor] 2026-04-29T13:35:49-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=93 util_mem=56 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   19  examples  19456  loss 6.8831  mae 7.3657
+[monitor] 2026-04-29T13:36:19-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=55 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   20  examples  20480  loss 6.7741  mae 7.2566
+  chunk   21  examples  21504  loss 6.6523  mae 7.1348
+[monitor] 2026-04-29T13:36:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=61 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   22  examples  22528  loss 7.0442  mae 7.5271
+[monitor] 2026-04-29T13:37:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=59 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   23  examples  23552  loss 6.6438  mae 7.1259
+[monitor] 2026-04-29T13:37:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=83 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   24  examples  24576  loss 7.0976  mae 7.5804
+  chunk   25  examples  25600  loss 6.6356  mae 7.1173
+[monitor] 2026-04-29T13:38:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=59 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   26  examples  26624  loss 6.6579  mae 7.1403
+[monitor] 2026-04-29T13:38:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=79 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   27  examples  27648  loss 6.5521  mae 7.0336
+  chunk   28  examples  28672  loss 6.7038  mae 7.1856
+[monitor] 2026-04-29T13:39:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=93 util_mem=63 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   29  examples  29696  loss 6.5244  mae 7.0063
+[monitor] 2026-04-29T13:39:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=80 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   30  examples  30720  loss 6.6746  mae 7.1563
+[monitor] 2026-04-29T13:40:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=79 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  chunk   31  examples  31744  loss 6.8084  mae 7.2904
+  chunk   32  examples  32768  loss 6.7281  mae 7.2103
+[monitor] 2026-04-29T13:40:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=63 last_csv=8,6.886951133608818,7.370750427246094,6.183875560760498,6.667116641998291,4.957946300506592,5.43740177154541,8.21020221710205,8.695782661437988
+  Epoch 9 summary  train_loss=6.8047  train_mae=7.2875  val_mae=6.3687  driving_holdout_mae=5.4040  sceneflow_holdout_mae=8.5168
+  ** New best val MAE: 6.3687 — saved best.keras **
+
+=== Epoch 10/16 ===
+  Mixed train: 32768 entries
+  chunk    1  examples   1024  loss 6.8777  mae 7.3601
+[monitor] 2026-04-29T13:41:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=62 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk    2  examples   2048  loss 6.9882  mae 7.4705
+[monitor] 2026-04-29T13:41:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=62 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk    3  examples   3072  loss 6.5852  mae 7.0658
+[monitor] 2026-04-29T13:42:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=66 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk    4  examples   4096  loss 6.4660  mae 6.9474
+  chunk    5  examples   5120  loss 6.4905  mae 6.9715
+[monitor] 2026-04-29T13:42:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=66 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk    6  examples   6144  loss 6.8085  mae 7.2902
+[monitor] 2026-04-29T13:43:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=62 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk    7  examples   7168  loss 7.0662  mae 7.5479
+  chunk    8  examples   8192  loss 6.4891  mae 6.9701
+[monitor] 2026-04-29T13:43:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=63 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk    9  examples   9216  loss 6.6498  mae 7.1306
+[monitor] 2026-04-29T13:44:20-10:00 gpu=0 batch_size=128 mem_used_mb=97171 mem_free_mb=80 util_gpu=97 util_mem=60 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   10  examples  10240  loss 6.6626  mae 7.1437
+[monitor] 2026-04-29T13:44:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=68 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   11  examples  11264  loss 6.2454  mae 6.7259
+  chunk   12  examples  12288  loss 6.4379  mae 6.9186
+[monitor] 2026-04-29T13:45:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=64 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   13  examples  13312  loss 6.6904  mae 7.1713
+[monitor] 2026-04-29T13:45:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=61 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   14  examples  14336  loss 6.4784  mae 6.9584
+  chunk   15  examples  15360  loss 6.3159  mae 6.7955
+[monitor] 2026-04-29T13:46:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=63 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   16  examples  16384  loss 6.7027  mae 7.1833
+[monitor] 2026-04-29T13:46:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=52 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   17  examples  17408  loss 6.7336  mae 7.2144
+  chunk   18  examples  18432  loss 6.6080  mae 7.0883
+[monitor] 2026-04-29T13:47:20-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=62 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   19  examples  19456  loss 6.6340  mae 7.1133
+[monitor] 2026-04-29T13:47:50-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=62 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   20  examples  20480  loss 6.3577  mae 6.8372
+[monitor] 2026-04-29T13:48:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=77 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   21  examples  21504  loss 6.6167  mae 7.0968
+  chunk   22  examples  22528  loss 6.3816  mae 6.8609
+[monitor] 2026-04-29T13:48:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=64 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   23  examples  23552  loss 6.4355  mae 6.9147
+[monitor] 2026-04-29T13:49:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=78 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   24  examples  24576  loss 6.5711  mae 7.0506
+  chunk   25  examples  25600  loss 6.4577  mae 6.9372
+[monitor] 2026-04-29T13:49:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=93 util_mem=63 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   26  examples  26624  loss 6.2853  mae 6.7646
+[monitor] 2026-04-29T13:50:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=68 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   27  examples  27648  loss 6.6365  mae 7.1161
+  chunk   28  examples  28672  loss 6.4560  mae 6.9346
+[monitor] 2026-04-29T13:50:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=62 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   29  examples  29696  loss 6.5059  mae 6.9849
+[monitor] 2026-04-29T13:51:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=79 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   30  examples  30720  loss 6.6979  mae 7.1773
+[monitor] 2026-04-29T13:51:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=60 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  chunk   31  examples  31744  loss 6.4475  mae 6.9260
+  chunk   32  examples  32768  loss 6.3589  mae 6.8372
+[monitor] 2026-04-29T13:52:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=78 last_csv=9,6.804723724722862,7.287466526031494,5.887047290802002,6.368659973144531,4.92578125,5.404034614562988,8.033232688903809,8.516792297363281
+  Epoch 10 summary  train_loss=6.5668  train_mae=7.0470  val_mae=5.9664  driving_holdout_mae=5.0944  sceneflow_holdout_mae=8.2332
+  ** New best val MAE: 5.9664 — saved best.keras **
+
+=== Epoch 11/16 ===
+  Mixed train: 32768 entries
+  chunk    1  examples   1024  loss 6.5544  mae 7.0334
+[monitor] 2026-04-29T13:52:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=65 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk    2  examples   2048  loss 6.5208  mae 6.9993
+[monitor] 2026-04-29T13:53:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=77 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk    3  examples   3072  loss 6.5937  mae 7.0730
+[monitor] 2026-04-29T13:53:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=71 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk    4  examples   4096  loss 6.4782  mae 6.9575
+  chunk    5  examples   5120  loss 6.3586  mae 6.8362
+[monitor] 2026-04-29T13:54:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=67 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk    6  examples   6144  loss 6.4887  mae 6.9673
+[monitor] 2026-04-29T13:54:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=64 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk    7  examples   7168  loss 6.2149  mae 6.6923
+  chunk    8  examples   8192  loss 6.4792  mae 6.9572
+[monitor] 2026-04-29T13:55:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=59 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk    9  examples   9216  loss 6.1288  mae 6.6062
+[monitor] 2026-04-29T13:55:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=78 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   10  examples  10240  loss 6.4448  mae 6.9224
+[monitor] 2026-04-29T13:56:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=77 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   11  examples  11264  loss 6.3833  mae 6.8610
+  chunk   12  examples  12288  loss 6.3319  mae 6.8089
+[monitor] 2026-04-29T13:56:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=65 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   13  examples  13312  loss 6.2177  mae 6.6942
+[monitor] 2026-04-29T13:57:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=82 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   14  examples  14336  loss 6.2818  mae 6.7584
+  chunk   15  examples  15360  loss 6.0547  mae 6.5309
+[monitor] 2026-04-29T13:57:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=64 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   16  examples  16384  loss 6.1884  mae 6.6656
+[monitor] 2026-04-29T13:58:21-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=79 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   17  examples  17408  loss 5.8537  mae 6.3294
+  chunk   18  examples  18432  loss 5.6842  mae 6.1592
+[monitor] 2026-04-29T13:58:51-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=92 util_mem=57 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   19  examples  19456  loss 6.4208  mae 6.8975
+[monitor] 2026-04-29T13:59:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=62 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   20  examples  20480  loss 6.0682  mae 6.5426
+[monitor] 2026-04-29T13:59:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=77 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   21  examples  21504  loss 5.8056  mae 6.2808
+  chunk   22  examples  22528  loss 6.3118  mae 6.7875
+[monitor] 2026-04-29T14:00:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=61 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   23  examples  23552  loss 5.8081  mae 6.2826
+[monitor] 2026-04-29T14:00:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=80 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   24  examples  24576  loss 6.1717  mae 6.6469
+  chunk   25  examples  25600  loss 5.4592  mae 5.9326
+[monitor] 2026-04-29T14:01:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=56 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   26  examples  26624  loss 5.9095  mae 6.3835
+[monitor] 2026-04-29T14:01:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=63 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   27  examples  27648  loss 5.9874  mae 6.4615
+[monitor] 2026-04-29T14:02:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=66 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   28  examples  28672  loss 5.6365  mae 6.1099
+  chunk   29  examples  29696  loss 5.8704  mae 6.3436
+[monitor] 2026-04-29T14:02:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=62 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   30  examples  30720  loss 5.6732  mae 6.1461
+[monitor] 2026-04-29T14:03:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=82 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  chunk   31  examples  31744  loss 5.7510  mae 6.2242
+  chunk   32  examples  32768  loss 5.4677  mae 5.9395
+[monitor] 2026-04-29T14:03:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=71 last_csv=10,6.56681615114212,7.047031477093697,5.4867072105407715,5.966369152069092,4.617914199829102,5.094364166259766,7.753246307373047,8.23324203491211
+  Epoch 11 summary  train_loss=6.1125  train_mae=6.5885  val_mae=5.2620  driving_holdout_mae=4.1011  sceneflow_holdout_mae=7.6567
+  ** New best val MAE: 5.2620 — saved best.keras **
+
+=== Epoch 12/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T14:04:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=55 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk    1  examples   1024  loss 5.8845  mae 6.3573
+  chunk    2  examples   2048  loss 5.7414  mae 6.2145
+[monitor] 2026-04-29T14:04:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=67 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk    3  examples   3072  loss 5.7662  mae 6.2384
+[monitor] 2026-04-29T14:05:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=53 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk    4  examples   4096  loss 5.3745  mae 5.8457
+  chunk    5  examples   5120  loss 5.3946  mae 5.8655
+[monitor] 2026-04-29T14:05:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=58 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk    6  examples   6144  loss 5.7892  mae 6.2612
+[monitor] 2026-04-29T14:06:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=81 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk    7  examples   7168  loss 5.3871  mae 5.8577
+  chunk    8  examples   8192  loss 5.4820  mae 5.9529
+[monitor] 2026-04-29T14:06:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=60 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk    9  examples   9216  loss 5.5753  mae 6.0462
+[monitor] 2026-04-29T14:07:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=64 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   10  examples  10240  loss 5.6272  mae 6.0983
+[monitor] 2026-04-29T14:07:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=79 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   11  examples  11264  loss 5.5991  mae 6.0698
+  chunk   12  examples  12288  loss 5.4976  mae 5.9678
+[monitor] 2026-04-29T14:08:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=59 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   13  examples  13312  loss 5.0877  mae 5.5571
+[monitor] 2026-04-29T14:08:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=82 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   14  examples  14336  loss 5.1243  mae 5.5938
+  chunk   15  examples  15360  loss 5.3656  mae 5.8354
+[monitor] 2026-04-29T14:09:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=64 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   16  examples  16384  loss 5.2840  mae 5.7527
+[monitor] 2026-04-29T14:09:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=80 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   17  examples  17408  loss 5.0312  mae 5.4997
+[monitor] 2026-04-29T14:10:22-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=67 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   18  examples  18432  loss 4.9573  mae 5.4262
+  chunk   19  examples  19456  loss 5.2706  mae 5.7405
+[monitor] 2026-04-29T14:10:52-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=62 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   20  examples  20480  loss 5.1753  mae 5.6433
+[monitor] 2026-04-29T14:11:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=80 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   21  examples  21504  loss 5.3140  mae 5.7828
+  chunk   22  examples  22528  loss 5.0954  mae 5.5632
+[monitor] 2026-04-29T14:11:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=66 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   23  examples  23552  loss 5.1472  mae 5.6155
+[monitor] 2026-04-29T14:12:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=77 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   24  examples  24576  loss 5.3054  mae 5.7744
+  chunk   25  examples  25600  loss 4.6363  mae 5.1029
+[monitor] 2026-04-29T14:12:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=88 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   26  examples  26624  loss 5.2642  mae 5.7321
+[monitor] 2026-04-29T14:13:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=61 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   27  examples  27648  loss 4.8555  mae 5.3226
+[monitor] 2026-04-29T14:13:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=69 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   28  examples  28672  loss 5.0633  mae 5.5309
+  chunk   29  examples  29696  loss 5.2289  mae 5.6968
+[monitor] 2026-04-29T14:14:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=90 util_mem=58 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   30  examples  30720  loss 5.1838  mae 5.6518
+[monitor] 2026-04-29T14:14:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=61 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  chunk   31  examples  31744  loss 5.0350  mae 5.5023
+  chunk   32  examples  32768  loss 5.3104  mae 5.7791
+[monitor] 2026-04-29T14:15:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=87 last_csv=11,6.112470582127571,6.588469237089157,4.787954807281494,5.2619781494140625,3.6313717365264893,4.101095676422119,7.181967735290527,7.656678199768066
+  Epoch 12 summary  train_loss=5.3079  train_mae=5.7774  val_mae=5.0092  driving_holdout_mae=3.6357  sceneflow_holdout_mae=7.0143
+  ** New best val MAE: 5.0092 — saved best.keras **
+
+=== Epoch 13/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T14:15:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=86 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk    1  examples   1024  loss 4.7961  mae 5.2624
+  chunk    2  examples   2048  loss 5.1463  mae 5.6147
+[monitor] 2026-04-29T14:16:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=59 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk    3  examples   3072  loss 5.1900  mae 5.6575
+[monitor] 2026-04-29T14:16:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=78 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk    4  examples   4096  loss 4.9310  mae 5.3974
+[monitor] 2026-04-29T14:17:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=74 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk    5  examples   5120  loss 4.9640  mae 5.4313
+  chunk    6  examples   6144  loss 5.0675  mae 5.5348
+[monitor] 2026-04-29T14:17:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=64 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk    7  examples   7168  loss 4.7957  mae 5.2623
+[monitor] 2026-04-29T14:18:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=81 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk    8  examples   8192  loss 4.7420  mae 5.2078
+  chunk    9  examples   9216  loss 4.9591  mae 5.4246
+[monitor] 2026-04-29T14:18:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=64 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   10  examples  10240  loss 4.7957  mae 5.2616
+[monitor] 2026-04-29T14:19:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=78 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   11  examples  11264  loss 5.1759  mae 5.6425
+  chunk   12  examples  12288  loss 4.7442  mae 5.2104
+[monitor] 2026-04-29T14:19:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=60 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   13  examples  13312  loss 4.9096  mae 5.3752
+[monitor] 2026-04-29T14:20:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=82 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   14  examples  14336  loss 5.0889  mae 5.5551
+[monitor] 2026-04-29T14:20:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=84 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   15  examples  15360  loss 5.0323  mae 5.4988
+  chunk   16  examples  16384  loss 4.7589  mae 5.2246
+[monitor] 2026-04-29T14:21:23-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=64 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   17  examples  17408  loss 5.0725  mae 5.5385
+[monitor] 2026-04-29T14:21:53-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=84 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   18  examples  18432  loss 4.9589  mae 5.4247
+  chunk   19  examples  19456  loss 4.8817  mae 5.3480
+[monitor] 2026-04-29T14:22:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=61 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   20  examples  20480  loss 4.6412  mae 5.1070
+[monitor] 2026-04-29T14:22:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=59 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   21  examples  21504  loss 4.8283  mae 5.2929
+  chunk   22  examples  22528  loss 4.9023  mae 5.3677
+[monitor] 2026-04-29T14:23:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=90 util_mem=55 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   23  examples  23552  loss 4.7269  mae 5.1920
+[monitor] 2026-04-29T14:23:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=65 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   24  examples  24576  loss 4.4878  mae 4.9512
+[monitor] 2026-04-29T14:24:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=76 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   25  examples  25600  loss 4.4889  mae 4.9515
+  chunk   26  examples  26624  loss 4.7154  mae 5.1793
+[monitor] 2026-04-29T14:24:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=65 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   27  examples  27648  loss 4.7783  mae 5.2433
+[monitor] 2026-04-29T14:25:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=77 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   28  examples  28672  loss 4.7931  mae 5.2578
+  chunk   29  examples  29696  loss 4.8741  mae 5.3392
+[monitor] 2026-04-29T14:25:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=62 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   30  examples  30720  loss 4.3510  mae 4.8144
+[monitor] 2026-04-29T14:26:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=52 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   31  examples  31744  loss 4.6781  mae 5.1417
+[monitor] 2026-04-29T14:26:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=68 last_csv=12,5.307940974831581,5.777444660663605,4.53917932510376,5.0092315673828125,3.1723098754882812,3.635672092437744,6.544401168823242,7.01431941986084
+  chunk   32  examples  32768  loss 4.5699  mae 5.0329
+  Epoch 13 summary  train_loss=4.8389  train_mae=5.3045  val_mae=4.4990  driving_holdout_mae=3.5042  sceneflow_holdout_mae=6.3730
+  ** New best val MAE: 4.4990 — saved best.keras **
+
+=== Epoch 14/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T14:27:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=77 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk    1  examples   1024  loss 4.3361  mae 4.7984
+  chunk    2  examples   2048  loss 4.7166  mae 5.1800
+[monitor] 2026-04-29T14:27:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=93 util_mem=59 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk    3  examples   3072  loss 4.8010  mae 5.2642
+[monitor] 2026-04-29T14:28:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=63 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk    4  examples   4096  loss 4.5392  mae 5.0018
+[monitor] 2026-04-29T14:28:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=78 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk    5  examples   5120  loss 4.3879  mae 4.8501
+  chunk    6  examples   6144  loss 4.6390  mae 5.1015
+[monitor] 2026-04-29T14:29:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=58 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk    7  examples   7168  loss 4.7262  mae 5.1891
+[monitor] 2026-04-29T14:29:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=58 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk    8  examples   8192  loss 4.4553  mae 4.9169
+[monitor] 2026-04-29T14:30:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=79 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk    9  examples   9216  loss 4.6604  mae 5.1231
+  chunk   10  examples  10240  loss 4.5337  mae 4.9965
+[monitor] 2026-04-29T14:30:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=91 util_mem=52 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   11  examples  11264  loss 4.9587  mae 5.4223
+[monitor] 2026-04-29T14:31:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=68 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   12  examples  12288  loss 4.5138  mae 4.9756
+[monitor] 2026-04-29T14:31:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=73 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   13  examples  13312  loss 4.4809  mae 4.9435
+  chunk   14  examples  14336  loss 4.6569  mae 5.1192
+[monitor] 2026-04-29T14:32:24-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=62 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   15  examples  15360  loss 4.4200  mae 4.8805
+[monitor] 2026-04-29T14:32:54-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=88 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   16  examples  16384  loss 4.4184  mae 4.8798
+  chunk   17  examples  17408  loss 4.5840  mae 5.0458
+[monitor] 2026-04-29T14:33:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=63 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   18  examples  18432  loss 4.4321  mae 4.8934
+[monitor] 2026-04-29T14:33:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=97 util_mem=64 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   19  examples  19456  loss 4.5850  mae 5.0469
+[monitor] 2026-04-29T14:34:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=83 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   20  examples  20480  loss 4.5677  mae 5.0294
+  chunk   21  examples  21504  loss 4.4688  mae 4.9302
+[monitor] 2026-04-29T14:34:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=93 util_mem=60 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   22  examples  22528  loss 4.5079  mae 4.9693
+[monitor] 2026-04-29T14:35:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=55 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   23  examples  23552  loss 4.3585  mae 4.8198
+[monitor] 2026-04-29T14:35:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=80 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   24  examples  24576  loss 4.6015  mae 5.0638
+  chunk   25  examples  25600  loss 4.4871  mae 4.9483
+[monitor] 2026-04-29T14:36:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=60 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   26  examples  26624  loss 4.5249  mae 4.9842
+[monitor] 2026-04-29T14:36:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=76 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   27  examples  27648  loss 4.4268  mae 4.8874
+[monitor] 2026-04-29T14:37:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=77 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   28  examples  28672  loss 4.2506  mae 4.7104
+  chunk   29  examples  29696  loss 4.7656  mae 5.2266
+[monitor] 2026-04-29T14:37:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=94 util_mem=58 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   30  examples  30720  loss 4.4661  mae 4.9276
+[monitor] 2026-04-29T14:38:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=76 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   31  examples  31744  loss 4.5164  mae 4.9773
+[monitor] 2026-04-29T14:38:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=69 last_csv=13,4.838921308517456,5.3044649213552475,4.0326995849609375,4.499014377593994,3.0448005199432373,3.504176139831543,5.906948089599609,6.3729939460754395
+  chunk   32  examples  32768  loss 4.5307  mae 4.9910
+  Epoch 14 summary  train_loss=4.5412  train_mae=5.0029  val_mae=4.4178  driving_holdout_mae=3.6161  sceneflow_holdout_mae=6.2668
+  ** New best val MAE: 4.4178 — saved best.keras **
+
+=== Epoch 15/16 ===
+  Mixed train: 32768 entries
+[monitor] 2026-04-29T14:39:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=61 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk    1  examples   1024  loss 4.4546  mae 4.9144
+[monitor] 2026-04-29T14:39:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=78 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk    2  examples   2048  loss 4.4925  mae 4.9526
+  chunk    3  examples   3072  loss 4.4163  mae 4.8766
+[monitor] 2026-04-29T14:40:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=61 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk    4  examples   4096  loss 4.4864  mae 4.9456
+[monitor] 2026-04-29T14:40:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=50 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk    5  examples   5120  loss 4.7311  mae 5.1915
+  chunk    6  examples   6144  loss 4.6456  mae 5.1061
+[monitor] 2026-04-29T14:41:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=77 util_mem=54 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk    7  examples   7168  loss 4.2648  mae 4.7242
+[monitor] 2026-04-29T14:41:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=64 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk    8  examples   8192  loss 4.1165  mae 4.5748
+[monitor] 2026-04-29T14:42:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=84 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk    9  examples   9216  loss 4.2263  mae 4.6845
+  chunk   10  examples  10240  loss 4.1790  mae 4.6375
+[monitor] 2026-04-29T14:42:55-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=93 util_mem=62 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   11  examples  11264  loss 4.2948  mae 4.7544
+[monitor] 2026-04-29T14:43:25-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=79 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   12  examples  12288  loss 4.3829  mae 4.8417
+[monitor] 2026-04-29T14:43:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=80 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   13  examples  13312  loss 4.1472  mae 4.6046
+  chunk   14  examples  14336  loss 4.2310  mae 4.6892
+[monitor] 2026-04-29T14:44:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=64 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   15  examples  15360  loss 4.2425  mae 4.7011
+[monitor] 2026-04-29T14:44:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=67 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   16  examples  16384  loss 4.6442  mae 5.1034
+  chunk   17  examples  17408  loss 4.2335  mae 4.6913
+[monitor] 2026-04-29T14:45:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=62 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   18  examples  18432  loss 4.4509  mae 4.9092
+[monitor] 2026-04-29T14:45:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=75 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   19  examples  19456  loss 4.3559  mae 4.8144
+[monitor] 2026-04-29T14:46:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=63 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   20  examples  20480  loss 4.4515  mae 4.9105
+  chunk   21  examples  21504  loss 4.4599  mae 4.9182
+[monitor] 2026-04-29T14:46:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=62 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   22  examples  22528  loss 4.5601  mae 5.0179
+[monitor] 2026-04-29T14:47:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=77 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   23  examples  23552  loss 4.3704  mae 4.8292
+[monitor] 2026-04-29T14:47:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=69 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   24  examples  24576  loss 4.4326  mae 4.8907
+  chunk   25  examples  25600  loss 4.1744  mae 4.6314
+[monitor] 2026-04-29T14:48:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=95 util_mem=60 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   26  examples  26624  loss 4.2338  mae 4.6910
+[monitor] 2026-04-29T14:48:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=58 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   27  examples  27648  loss 4.1620  mae 4.6192
+  chunk   28  examples  28672  loss 4.2586  mae 4.7158
+[monitor] 2026-04-29T14:49:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=62 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   29  examples  29696  loss 4.2999  mae 4.7575
+[monitor] 2026-04-29T14:49:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=70 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   30  examples  30720  loss 4.5680  mae 5.0260
+[monitor] 2026-04-29T14:50:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=99 util_mem=81 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  chunk   31  examples  31744  loss 4.0837  mae 4.5402
+  chunk   32  examples  32768  loss 4.1220  mae 4.5787
+[monitor] 2026-04-29T14:50:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=98 util_mem=63 last_csv=14,4.5411796271800995,5.002941772341728,3.9543352127075195,4.417768478393555,3.15609073638916,3.616075277328491,5.805220127105713,6.266824245452881
+  Epoch 15 summary  train_loss=4.3492  train_mae=4.8076  val_mae=4.1347  driving_holdout_mae=3.4002  sceneflow_holdout_mae=5.5961
+  ** New best val MAE: 4.1347 — saved best.keras **
+
+=== Epoch 16/16 ===
+  Mixed train: 32768 entries
+  chunk    1  examples   1024  loss 4.4722  mae 4.9290
+[monitor] 2026-04-29T14:51:26-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=60 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk    2  examples   2048  loss 4.2155  mae 4.6710
+[monitor] 2026-04-29T14:51:56-10:00 gpu=0 batch_size=128 mem_used_mb=94212 mem_free_mb=3039 util_gpu=96 util_mem=63 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk    3  examples   3072  loss 4.0764  mae 4.5318
+  chunk    4  examples   4096  loss 4.0854  mae 4.5417
+[monitor] 2026-04-29T14:52:26-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=70 util_mem=43 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk    5  examples   5120  loss 4.1543  mae 4.6102
+[monitor] 2026-04-29T14:52:56-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=100 util_mem=99 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk    6  examples   6144  loss 4.1189  mae 4.5752
+  chunk    7  examples   7168  loss 4.2010  mae 4.6577
+[monitor] 2026-04-29T14:53:26-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=84 util_mem=58 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk    8  examples   8192  loss 4.0495  mae 4.5061
+[monitor] 2026-04-29T14:53:56-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=99 util_mem=65 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk    9  examples   9216  loss 4.3144  mae 4.7709
+  chunk   10  examples  10240  loss 4.0360  mae 4.4907
+[monitor] 2026-04-29T14:54:26-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=99 util_mem=71 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   11  examples  11264  loss 3.9724  mae 4.4275
+  chunk   12  examples  12288  loss 4.3352  mae 4.7910
+[monitor] 2026-04-29T14:54:57-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=81 util_mem=54 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   13  examples  13312  loss 4.2817  mae 4.7375
+[monitor] 2026-04-29T14:55:27-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=99 util_mem=81 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   14  examples  14336  loss 4.0230  mae 4.4767
+  chunk   15  examples  15360  loss 3.9850  mae 4.4388
+[monitor] 2026-04-29T14:55:57-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=78 util_mem=52 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   16  examples  16384  loss 4.2565  mae 4.7115
+  chunk   17  examples  17408  loss 4.0548  mae 4.5092
+[monitor] 2026-04-29T14:56:27-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=68 util_mem=46 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   18  examples  18432  loss 3.9772  mae 4.4317
+[monitor] 2026-04-29T14:56:57-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=99 util_mem=83 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   19  examples  19456  loss 4.3227  mae 4.7783
+  chunk   20  examples  20480  loss 4.1443  mae 4.5996
+[monitor] 2026-04-29T14:57:27-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=83 util_mem=56 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   21  examples  21504  loss 4.2946  mae 4.7489
+[monitor] 2026-04-29T14:57:57-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=99 util_mem=88 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   22  examples  22528  loss 4.0699  mae 4.5251
+  chunk   23  examples  23552  loss 4.0770  mae 4.5329
+[monitor] 2026-04-29T14:58:27-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=99 util_mem=79 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   24  examples  24576  loss 4.0736  mae 4.5273
+  chunk   25  examples  25600  loss 4.2395  mae 4.6944
+[monitor] 2026-04-29T14:58:57-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=75 util_mem=49 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   26  examples  26624  loss 4.1518  mae 4.6061
+[monitor] 2026-04-29T14:59:27-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=94 util_mem=67 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   27  examples  27648  loss 4.0349  mae 4.4882
+  chunk   28  examples  28672  loss 4.0643  mae 4.5174
+[monitor] 2026-04-29T14:59:57-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=89 util_mem=65 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   29  examples  29696  loss 4.3274  mae 4.7821
+  chunk   30  examples  30720  loss 3.9752  mae 4.4283
+[monitor] 2026-04-29T15:00:27-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=71 util_mem=45 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   31  examples  31744  loss 4.1067  mae 4.5614
+[monitor] 2026-04-29T15:00:57-10:00 gpu=0 batch_size=128 mem_used_mb=89317 mem_free_mb=7934 util_gpu=99 util_mem=81 last_csv=15,4.3491537272930145,4.807613253593445,3.6757376194000244,4.1346659660339355,2.945887565612793,3.400188446044922,5.139398574829102,5.596147060394287
+  chunk   32  examples  32768  loss 4.3059  mae 4.7599
+  Epoch 16 summary  train_loss=4.1499  train_mae=4.6049  val_mae=3.6775  driving_holdout_mae=3.4427  sceneflow_holdout_mae=5.2268
+  ** New best val MAE: 3.6775 — saved best.keras **
+
+Training complete. Best val MAE: 3.6775
+Artefacts saved to: /home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128
+[launcher] 2026-04-29T15:01:21-10:00 exit_code=0
+[launcher] train pane is idle. Exit this shell when you are done inspecting the session.
+[monitor] 2026-04-29T15:01:27-10:00 training complete; metrics.json is available at /home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/metrics.json
+[monitor] monitor window is idle. Exit this shell when you are done inspecting the session.

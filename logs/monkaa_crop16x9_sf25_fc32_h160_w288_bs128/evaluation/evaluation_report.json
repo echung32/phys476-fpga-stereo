@@ -1,0 +1,301 @@
+{
+  "run_dir": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128",
+  "checkpoint": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/checkpoints/best.keras",
+  "config": {
+    "run_name": "monkaa_crop16x9_sf25_fc32_h160_w288_bs128",
+    "output_dir": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128",
+    "sceneflow_dataset": "v2/data/raw/sceneflow/monkaa",
+    "kitti_hf_dataset": "UniflexAI/mini_kitti",
+    "driving_stereo_dir": "v2/data/raw/driving_stereo",
+    "kitti2015_dir": "v2/data/raw/kitti2015",
+    "kitti2012_dir": "v2/data/raw/kitti2012",
+    "sceneflow_limit": 0,
+    "driving_stereo_limit": 0,
+    "kitti2015_limit": 0,
+    "kitti2012_limit": 0,
+    "kitti_hf_limit": 88,
+    "val_limit": 0,
+    "driving_holdout_limit": 1024,
+    "sceneflow_holdout_limit": 1024,
+    "target_height": 160,
+    "target_width": 288,
+    "max_disp": 64,
+    "feature_channels": 32,
+    "learning_rate": 0.0003,
+    "epochs": 16,
+    "batch_size": 128,
+    "chunk_size": 1024,
+    "loader_workers": 12,
+    "train_epoch_size": 32768,
+    "augment": true,
+    "seed": 0,
+    "sceneflow_frac": 0.25,
+    "driving_stereo_frac": 0.55,
+    "kitti_frac": 0.2,
+    "input_fit_mode": "crop"
+  },
+  "driving_holdout": {
+    "selected_examples": 1024,
+    "metrics": {
+      "examples": 1024,
+      "valid_pixels": 8421142,
+      "mae": 3.1026750291112535,
+      "rmse": 4.561243797750935,
+      "bad_1px": 0.7154642446357038,
+      "bad_3px": 0.35393073766004657,
+      "bad_5px": 0.19429953799615302
+    },
+    "samples": [
+      {
+        "metadata": {
+          "source": "driving_stereo",
+          "left": "/home/ethan/github/phys476/v2/data/raw/driving_stereo/train-left-image/2018-10-19-10-33-08_2018-10-19-11-24-56-707.jpg",
+          "split": "train"
+        },
+        "valid_pixels": 8519,
+        "mae": 3.4520010948181152,
+        "p95_abs_error": 10.431053161621094,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/driving_holdout/driving_holdout_00.png"
+      },
+      {
+        "metadata": {
+          "source": "driving_stereo",
+          "left": "/home/ethan/github/phys476/v2/data/raw/driving_stereo/train-left-image/2018-10-23-13-59-11_2018-10-23-14-25-57-940.jpg",
+          "split": "train"
+        },
+        "valid_pixels": 7674,
+        "mae": 2.4605226516723633,
+        "p95_abs_error": 8.364381790161133,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/driving_holdout/driving_holdout_01.png"
+      },
+      {
+        "metadata": {
+          "source": "driving_stereo",
+          "left": "/home/ethan/github/phys476/v2/data/raw/driving_stereo/train-left-image/2018-10-18-10-39-04_2018-10-18-10-50-09-567.jpg",
+          "split": "train"
+        },
+        "valid_pixels": 7732,
+        "mae": 3.631864309310913,
+        "p95_abs_error": 10.05068588256836,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/driving_holdout/driving_holdout_02.png"
+      },
+      {
+        "metadata": {
+          "source": "driving_stereo",
+          "left": "/home/ethan/github/phys476/v2/data/raw/driving_stereo/train-left-image/2018-10-26-15-24-18_2018-10-26-15-25-43-870.jpg",
+          "split": "train"
+        },
+        "valid_pixels": 4289,
+        "mae": 2.180655002593994,
+        "p95_abs_error": 7.009213447570801,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/driving_holdout/driving_holdout_03.png"
+      },
+      {
+        "metadata": {
+          "source": "driving_stereo",
+          "left": "/home/ethan/github/phys476/v2/data/raw/driving_stereo/train-left-image/2018-10-23-15-06-54_2018-10-23-15-42-35-025.jpg",
+          "split": "train"
+        },
+        "valid_pixels": 8006,
+        "mae": 2.507251024246216,
+        "p95_abs_error": 7.960898399353027,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/driving_holdout/driving_holdout_04.png"
+      },
+      {
+        "metadata": {
+          "source": "driving_stereo",
+          "left": "/home/ethan/github/phys476/v2/data/raw/driving_stereo/train-left-image/2018-10-18-15-04-21_2018-10-18-15-35-08-054.jpg",
+          "split": "train"
+        },
+        "valid_pixels": 10253,
+        "mae": 3.6084656715393066,
+        "p95_abs_error": 10.402976036071777,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/driving_holdout/driving_holdout_05.png"
+      }
+    ]
+  },
+  "mini_kitti_validation": {
+    "selected_examples": 88,
+    "metrics": {
+      "examples": 88,
+      "valid_pixels": 2203259,
+      "mae": 3.391732882970182,
+      "rmse": 5.111840060460734,
+      "bad_1px": 0.7198354800774671,
+      "bad_3px": 0.373991891103134,
+      "bad_5px": 0.21814003709958749
+    },
+    "samples": [
+      {
+        "metadata": {
+          "source": "kitti_hf",
+          "dataset_id": "UniflexAI/mini_kitti",
+          "split": "validation",
+          "sequence_id": "12",
+          "image_id": "000000.png",
+          "fx": 707.0912,
+          "baseline": 0.5379044881339211
+        },
+        "valid_pixels": 25056,
+        "mae": 4.267733097076416,
+        "p95_abs_error": 14.105565071105957,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/mini_kitti_validation/mini_kitti_validation_00.png"
+      },
+      {
+        "metadata": {
+          "source": "kitti_hf",
+          "dataset_id": "UniflexAI/mini_kitti",
+          "split": "validation",
+          "sequence_id": "13",
+          "image_id": "000003.png",
+          "fx": 718.856,
+          "baseline": 0.5323318578407914
+        },
+        "valid_pixels": 25056,
+        "mae": 3.3098678588867188,
+        "p95_abs_error": 12.037334442138672,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/mini_kitti_validation/mini_kitti_validation_01.png"
+      },
+      {
+        "metadata": {
+          "source": "kitti_hf",
+          "dataset_id": "UniflexAI/mini_kitti",
+          "split": "validation",
+          "sequence_id": "15",
+          "image_id": "000002.png",
+          "fx": 718.856,
+          "baseline": 0.5323318578407914
+        },
+        "valid_pixels": 25039,
+        "mae": 3.391449451446533,
+        "p95_abs_error": 12.386061668395996,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/mini_kitti_validation/mini_kitti_validation_02.png"
+      },
+      {
+        "metadata": {
+          "source": "kitti_hf",
+          "dataset_id": "UniflexAI/mini_kitti",
+          "split": "validation",
+          "sequence_id": "15",
+          "image_id": "000004.png",
+          "fx": 718.856,
+          "baseline": 0.5323318578407914
+        },
+        "valid_pixels": 25039,
+        "mae": 3.0820298194885254,
+        "p95_abs_error": 9.501054763793945,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/mini_kitti_validation/mini_kitti_validation_03.png"
+      },
+      {
+        "metadata": {
+          "source": "kitti_hf",
+          "dataset_id": "UniflexAI/mini_kitti",
+          "split": "validation",
+          "sequence_id": "19",
+          "image_id": "000000.png",
+          "fx": 718.856,
+          "baseline": 0.5323318578407914
+        },
+        "valid_pixels": 25056,
+        "mae": 3.683730363845825,
+        "p95_abs_error": 12.333793640136719,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/mini_kitti_validation/mini_kitti_validation_04.png"
+      },
+      {
+        "metadata": {
+          "source": "kitti_hf",
+          "dataset_id": "UniflexAI/mini_kitti",
+          "split": "validation",
+          "sequence_id": "21",
+          "image_id": "000007.png",
+          "fx": 718.856,
+          "baseline": 0.5323318578407914
+        },
+        "valid_pixels": 25056,
+        "mae": 2.830002784729004,
+        "p95_abs_error": 9.77077865600586,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/mini_kitti_validation/mini_kitti_validation_05.png"
+      }
+    ]
+  },
+  "sceneflow_holdout": {
+    "selected_examples": 1024,
+    "metrics": {
+      "examples": 1024,
+      "valid_pixels": 44630346,
+      "mae": 5.201473634105368,
+      "rmse": 9.028414294989581,
+      "bad_1px": 0.7347919059377223,
+      "bad_3px": 0.44089310891741684,
+      "bad_5px": 0.3028625635122793
+    },
+    "samples": [
+      {
+        "metadata": {
+          "source": "sceneflow_local",
+          "root_dir": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa",
+          "left": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa/frames_cleanpass/treeflight_augmented0_x2/left/0345.png"
+        },
+        "valid_pixels": 33624,
+        "mae": 16.704282760620117,
+        "p95_abs_error": 39.83397674560547,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/sceneflow_holdout/sceneflow_holdout_00.png"
+      },
+      {
+        "metadata": {
+          "source": "sceneflow_local",
+          "root_dir": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa",
+          "left": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa/frames_cleanpass/funnyworld_camera2_augmented0_x2/left/0141.png"
+        },
+        "valid_pixels": 45440,
+        "mae": 2.668497085571289,
+        "p95_abs_error": 8.894730567932129,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/sceneflow_holdout/sceneflow_holdout_01.png"
+      },
+      {
+        "metadata": {
+          "source": "sceneflow_local",
+          "root_dir": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa",
+          "left": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa/frames_cleanpass/funnyworld_camera2_augmented0_x2/left/0382.png"
+        },
+        "valid_pixels": 45440,
+        "mae": 5.424497127532959,
+        "p95_abs_error": 19.7355899810791,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/sceneflow_holdout/sceneflow_holdout_02.png"
+      },
+      {
+        "metadata": {
+          "source": "sceneflow_local",
+          "root_dir": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa",
+          "left": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa/frames_cleanpass/funnyworld_camera2_augmented0_x2/left/0259.png"
+        },
+        "valid_pixels": 37980,
+        "mae": 13.468315124511719,
+        "p95_abs_error": 37.00775146484375,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/sceneflow_holdout/sceneflow_holdout_03.png"
+      },
+      {
+        "metadata": {
+          "source": "sceneflow_local",
+          "root_dir": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa",
+          "left": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa/frames_cleanpass/lonetree_x2/left/0083.png"
+        },
+        "valid_pixels": 45440,
+        "mae": 2.46689510345459,
+        "p95_abs_error": 7.806397438049316,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/sceneflow_holdout/sceneflow_holdout_04.png"
+      },
+      {
+        "metadata": {
+          "source": "sceneflow_local",
+          "root_dir": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa",
+          "left": "/home/ethan/github/phys476/v2/data/raw/sceneflow/monkaa/frames_cleanpass/funnyworld_camera2_augmented0_x2/left/0238.png"
+        },
+        "valid_pixels": 45093,
+        "mae": 13.45394515991211,
+        "p95_abs_error": 37.48800277709961,
+        "panel_path": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/evaluation/samples/sceneflow_holdout/sceneflow_holdout_05.png"
+      }
+    ]
+  }
+}

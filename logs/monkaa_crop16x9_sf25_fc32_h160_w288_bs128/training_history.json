@@ -1,0 +1,178 @@
+[
+  {
+    "epoch": 1,
+    "train_loss": 8.893406242132187,
+    "train_mae": 9.381450831890106,
+    "val_loss": 6.9391703605651855,
+    "val_mae": 7.429328441619873,
+    "driving_holdout_loss": 5.521380424499512,
+    "driving_holdout_mae": 6.0061821937561035,
+    "sceneflow_holdout_loss": 8.780573844909668,
+    "sceneflow_holdout_mae": 9.26888656616211
+  },
+  {
+    "epoch": 2,
+    "train_loss": 7.34408238530159,
+    "train_mae": 7.8305890411138535,
+    "val_loss": 6.62867546081543,
+    "val_mae": 7.117703437805176,
+    "driving_holdout_loss": 5.542219161987305,
+    "driving_holdout_mae": 6.0261311531066895,
+    "sceneflow_holdout_loss": 8.689545631408691,
+    "sceneflow_holdout_mae": 9.178215026855469
+  },
+  {
+    "epoch": 3,
+    "train_loss": 7.251996234059334,
+    "train_mae": 7.738395377993584,
+    "val_loss": 6.638583183288574,
+    "val_mae": 7.124954700469971,
+    "driving_holdout_loss": 5.279665470123291,
+    "driving_holdout_mae": 5.762617111206055,
+    "sceneflow_holdout_loss": 8.638540267944336,
+    "sceneflow_holdout_mae": 9.12705135345459
+  },
+  {
+    "epoch": 4,
+    "train_loss": 7.112322852015495,
+    "train_mae": 7.597986251115799,
+    "val_loss": 6.031673908233643,
+    "val_mae": 6.516429901123047,
+    "driving_holdout_loss": 5.470106601715088,
+    "driving_holdout_mae": 5.952610015869141,
+    "sceneflow_holdout_loss": 8.35139274597168,
+    "sceneflow_holdout_mae": 8.840123176574707
+  },
+  {
+    "epoch": 5,
+    "train_loss": 7.130859136581421,
+    "train_mae": 7.616270378232002,
+    "val_loss": 6.171627521514893,
+    "val_mae": 6.656459331512451,
+    "driving_holdout_loss": 5.305501461029053,
+    "driving_holdout_mae": 5.787384510040283,
+    "sceneflow_holdout_loss": 8.375699996948242,
+    "sceneflow_holdout_mae": 8.863574028015137
+  },
+  {
+    "epoch": 6,
+    "train_loss": 6.974552422761917,
+    "train_mae": 7.459526419639587,
+    "val_loss": 6.405914783477783,
+    "val_mae": 6.891282081604004,
+    "driving_holdout_loss": 5.175086975097656,
+    "driving_holdout_mae": 5.656609535217285,
+    "sceneflow_holdout_loss": 8.408062934875488,
+    "sceneflow_holdout_mae": 8.896455764770508
+  },
+  {
+    "epoch": 7,
+    "train_loss": 6.953340396285057,
+    "train_mae": 7.437664419412613,
+    "val_loss": 6.094057083129883,
+    "val_mae": 6.577634811401367,
+    "driving_holdout_loss": 5.063317775726318,
+    "driving_holdout_mae": 5.543973922729492,
+    "sceneflow_holdout_loss": 8.205387115478516,
+    "sceneflow_holdout_mae": 8.692094802856445
+  },
+  {
+    "epoch": 8,
+    "train_loss": 6.886951133608818,
+    "train_mae": 7.370750427246094,
+    "val_loss": 6.183875560760498,
+    "val_mae": 6.667116641998291,
+    "driving_holdout_loss": 4.957946300506592,
+    "driving_holdout_mae": 5.43740177154541,
+    "sceneflow_holdout_loss": 8.21020221710205,
+    "sceneflow_holdout_mae": 8.695782661437988
+  },
+  {
+    "epoch": 9,
+    "train_loss": 6.804723724722862,
+    "train_mae": 7.287466526031494,
+    "val_loss": 5.887047290802002,
+    "val_mae": 6.368659973144531,
+    "driving_holdout_loss": 4.92578125,
+    "driving_holdout_mae": 5.404034614562988,
+    "sceneflow_holdout_loss": 8.033232688903809,
+    "sceneflow_holdout_mae": 8.516792297363281
+  },
+  {
+    "epoch": 10,
+    "train_loss": 6.56681615114212,
+    "train_mae": 7.047031477093697,
+    "val_loss": 5.4867072105407715,
+    "val_mae": 5.966369152069092,
+    "driving_holdout_loss": 4.617914199829102,
+    "driving_holdout_mae": 5.094364166259766,
+    "sceneflow_holdout_loss": 7.753246307373047,
+    "sceneflow_holdout_mae": 8.23324203491211
+  },
+  {
+    "epoch": 11,
+    "train_loss": 6.112470582127571,
+    "train_mae": 6.588469237089157,
+    "val_loss": 4.787954807281494,
+    "val_mae": 5.2619781494140625,
+    "driving_holdout_loss": 3.6313717365264893,
+    "driving_holdout_mae": 4.101095676422119,
+    "sceneflow_holdout_loss": 7.181967735290527,
+    "sceneflow_holdout_mae": 7.656678199768066
+  },
+  {
+    "epoch": 12,
+    "train_loss": 5.307940974831581,
+    "train_mae": 5.777444660663605,
+    "val_loss": 4.53917932510376,
+    "val_mae": 5.0092315673828125,
+    "driving_holdout_loss": 3.1723098754882812,
+    "driving_holdout_mae": 3.635672092437744,
+    "sceneflow_holdout_loss": 6.544401168823242,
+    "sceneflow_holdout_mae": 7.01431941986084
+  },
+  {
+    "epoch": 13,
+    "train_loss": 4.838921308517456,
+    "train_mae": 5.3044649213552475,
+    "val_loss": 4.0326995849609375,
+    "val_mae": 4.499014377593994,
+    "driving_holdout_loss": 3.0448005199432373,
+    "driving_holdout_mae": 3.504176139831543,
+    "sceneflow_holdout_loss": 5.906948089599609,
+    "sceneflow_holdout_mae": 6.3729939460754395
+  },
+  {
+    "epoch": 14,
+    "train_loss": 4.5411796271800995,
+    "train_mae": 5.002941772341728,
+    "val_loss": 3.9543352127075195,
+    "val_mae": 4.417768478393555,
+    "driving_holdout_loss": 3.15609073638916,
+    "driving_holdout_mae": 3.616075277328491,
+    "sceneflow_holdout_loss": 5.805220127105713,
+    "sceneflow_holdout_mae": 6.266824245452881
+  },
+  {
+    "epoch": 15,
+    "train_loss": 4.3491537272930145,
+    "train_mae": 4.807613253593445,
+    "val_loss": 3.6757376194000244,
+    "val_mae": 4.1346659660339355,
+    "driving_holdout_loss": 2.945887565612793,
+    "driving_holdout_mae": 3.400188446044922,
+    "sceneflow_holdout_loss": 5.139398574829102,
+    "sceneflow_holdout_mae": 5.596147060394287
+  },
+  {
+    "epoch": 16,
+    "train_loss": 4.149904705584049,
+    "train_mae": 4.604946002364159,
+    "val_loss": 3.2216529846191406,
+    "val_mae": 3.677483558654785,
+    "driving_holdout_loss": 2.9879567623138428,
+    "driving_holdout_mae": 3.4426846504211426,
+    "sceneflow_holdout_loss": 4.773380279541016,
+    "sceneflow_holdout_mae": 5.226849555969238
+  }
+]

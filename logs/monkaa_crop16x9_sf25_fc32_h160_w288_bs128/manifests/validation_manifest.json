@@ -1,0 +1,794 @@
+[
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000000.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000001.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000002.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000003.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000004.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000005.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000006.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "11",
+    "image_id": "000007.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000000.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000001.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000002.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000003.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000004.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000005.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000006.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "12",
+    "image_id": "000007.png",
+    "fx": 707.0912,
+    "baseline": 0.5379044881339211
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "13",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "14",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "15",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "16",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "17",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "18",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "19",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "20",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000000.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000001.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000002.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000003.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000004.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000005.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000006.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  },
+  {
+    "source": "kitti_hf",
+    "dataset_id": "UniflexAI/mini_kitti",
+    "split": "validation",
+    "sequence_id": "21",
+    "image_id": "000007.png",
+    "fx": 718.856,
+    "baseline": 0.5323318578407914
+  }
+]

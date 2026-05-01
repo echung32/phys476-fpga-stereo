@@ -1,0 +1,24 @@
+{
+  "best_val_mae": 3.677483558654785,
+  "last_epoch": {
+    "epoch": 16,
+    "train_loss": 4.149904705584049,
+    "train_mae": 4.604946002364159,
+    "val_loss": 3.2216529846191406,
+    "val_mae": 3.677483558654785,
+    "driving_holdout_loss": 2.9879567623138428,
+    "driving_holdout_mae": 3.4426846504211426,
+    "sceneflow_holdout_loss": 4.773380279541016,
+    "sceneflow_holdout_mae": 5.226849555969238
+  },
+  "train_examples": 32768,
+  "validation_examples": 88,
+  "driving_holdout_examples": 1024,
+  "sceneflow_holdout_examples": 1024,
+  "artifacts": {
+    "best_checkpoint": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/checkpoints/best.keras",
+    "latest_checkpoint": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/checkpoints/latest.keras",
+    "parity_batch": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/parity_batch.npz",
+    "student_model": "/home/ethan/github/phys476/logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/student_model.keras"
+  }
+}
