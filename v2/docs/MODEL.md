@@ -61,9 +61,9 @@ KERAS_BACKEND=torch uv run python -m v2.training.train_stereo [flags]
 
 | Dataset        | Source                        | Role      | Fraction |
 |----------------|-------------------------------|-----------|----------|
-| Scene Flow     | `olivermao/sceneflow` (HF tar)| train     | 50 %     |
-| DrivingStereo  | local disk (official download)| train     | 35 %     |
+| DrivingStereo  | local disk (official download)| train     | 85 %     |
 | KITTI 2015/12  | local disk (official download)| train     | 15 %     |
+| Scene Flow     | `olivermao/sceneflow` (HF tar)| optional  | 0 % default |
 | mini_kitti     | `UniflexAI/mini_kitti` (HF)   | val only  | —        |
 
 ### Key flags
@@ -72,21 +72,27 @@ KERAS_BACKEND=torch uv run python -m v2.training.train_stereo [flags]
 |-----------------------|---------|-------------------------------------|
 | `--epochs`            | 10      | Full passes over the mixed manifest |
 | `--batch-size`        | 4       | Images per gradient step            |
-| `--chunk-size`        | 256     | SceneFlow streaming chunk size      |
+| `--chunk-size`        | 256     | Examples loaded per training chunk  |
+| `--train-epoch-size`  | 16384   | Examples drawn into each mixed epoch |
 | `--max-disp`          | 48      | Disparity range (pixels)            |
 | `--target-height`     | 96      | Input image height                  |
 | `--target-width`      | 320     | Input image width                   |
 | `--driving-stereo-dir`| ""      | Path to DrivingStereo root (skip if absent) |
 | `--kitti2015-dir`     | ""      | Path to KITTI 2015 root (skip if absent)    |
 | `--kitti2012-dir`     | ""      | Path to KITTI 2012 root (skip if absent)    |
+| `--sceneflow-dataset` | ""      | Optional Scene Flow dataset id              |
 
 ### Smoke test (CPU, no GPU required)
 
 ```bash
 KERAS_BACKEND=torch uv run python -m v2.training.train_stereo \
     --run-name smoke \
-    --epochs 1 --batch-size 2 \
-    --chunk-size 16 --sceneflow-limit 32 \
+   --driving-stereo-dir v2/data/raw/driving_stereo \
+   --kitti2015-dir v2/data/raw/kitti2015 \
+   --kitti2012-dir v2/data/raw/kitti2012 \
+   --driving-stereo-limit 16 --kitti2015-limit 8 --kitti2012-limit 8 \
+   --train-epoch-size 24 --epochs 1 --batch-size 2 \
+   --chunk-size 8 \
     --val-limit 4 --no-augment
 ```
 
@@ -147,11 +153,3 @@ hls4ml-synthesised block.
 # Extract into v2/data/raw/kitti2012/ so that:
 #   v2/data/raw/kitti2012/training/colored_0/<xxxxxx_10.png> exists
 ```
-
----
-
-## Out of Scope
-
-- Teacher models, distillation, pseudo-labelling
-- FoundationStereo integration
-- Patch-MLP matching (removed)

@@ -13,7 +13,7 @@ Forbidden operations (enforced by design — none of the functions below perform
 Allowed operations implemented here:
   - Shared crop (same random crop for all four arrays)
   - Shared resize with disparity scaling by horizontal scale factor
-  - Shared pad / center-crop to a fixed output size
+    - Shared aspect-ratio-preserving resize plus symmetric pad to a fixed output size
   - Shared photometric jitter (brightness / contrast / gamma) applied identically
     to both left and right, with a separate optional per-image version for colour
     consistency simulation
@@ -195,6 +195,108 @@ def _shared_resize(
         _resize_img(right),
         _resize_disp(disparity),
         _resize_mask(valid_mask),
+    )
+
+
+def resize_to_shape(
+    left: np.ndarray,
+    right: np.ndarray,
+    disparity: np.ndarray,
+    valid_mask: np.ndarray,
+    *,
+    out_h: int,
+    out_w: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Preserve aspect ratio, then symmetrically pad to the requested shape.
+
+    This avoids the train/eval mismatch from crop-based fitting and avoids
+    stretching wide images like Monkaa into the target aspect ratio.
+    """
+    orig_h, orig_w = left.shape[:2]
+    if orig_h == out_h and orig_w == out_w:
+        return left, right, disparity, valid_mask
+
+    scale = min(out_h / orig_h, out_w / orig_w)
+    resize_h = min(out_h, max(1, int(round(orig_h * scale))))
+    resize_w = min(out_w, max(1, int(round(orig_w * scale))))
+
+    left, right, disparity, valid_mask = _shared_resize(
+        left,
+        right,
+        disparity,
+        valid_mask,
+        out_h=resize_h,
+        out_w=resize_w,
+    )
+
+    pad_h = max(0, out_h - resize_h)
+    pad_w = max(0, out_w - resize_w)
+    pad_top, pad_bottom = pad_h // 2, pad_h - pad_h // 2
+    pad_left, pad_right = pad_w // 2, pad_w - pad_w // 2
+
+    left = np.pad(left, ((pad_top, pad_bottom), (pad_left, pad_right)))
+    right = np.pad(right, ((pad_top, pad_bottom), (pad_left, pad_right)))
+    disparity = np.pad(
+        disparity,
+        ((pad_top, pad_bottom), (pad_left, pad_right)),
+        constant_values=0.0,
+    )
+    valid_mask = np.pad(
+        valid_mask,
+        ((pad_top, pad_bottom), (pad_left, pad_right)),
+        constant_values=False,
+    )
+    return left, right, disparity, valid_mask
+
+
+def crop_resize_to_shape(
+    left: np.ndarray,
+    right: np.ndarray,
+    disparity: np.ndarray,
+    valid_mask: np.ndarray,
+    *,
+    out_h: int,
+    out_w: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Centre-crop to the target aspect ratio, then resize exactly.
+
+    This avoids padding entirely. It is a better match for fixed-aspect-ratio
+    deployment inputs, but it discards field of view when source datasets are
+    wider or taller than the requested output aspect ratio.
+    """
+    orig_h, orig_w = left.shape[:2]
+    if orig_h == out_h and orig_w == out_w:
+        return left, right, disparity, valid_mask
+
+    target_aspect = out_w / out_h
+    orig_aspect = orig_w / orig_h
+
+    if np.isclose(orig_aspect, target_aspect):
+        crop_h, crop_w = orig_h, orig_w
+    elif orig_aspect > target_aspect:
+        crop_h = orig_h
+        crop_w = max(1, min(orig_w, int(round(orig_h * target_aspect))))
+    else:
+        crop_w = orig_w
+        crop_h = max(1, min(orig_h, int(round(orig_w / target_aspect))))
+
+    if crop_h != orig_h or crop_w != orig_w:
+        left, right, disparity, valid_mask = _shared_centre_crop(
+            left,
+            right,
+            disparity,
+            valid_mask,
+            crop_h=crop_h,
+            crop_w=crop_w,
+        )
+
+    return _shared_resize(
+        left,
+        right,
+        disparity,
+        valid_mask,
+        out_h=out_h,
+        out_w=out_w,
     )
 
 

@@ -51,14 +51,16 @@ This better matches efficient downstream hardware than repeated per-pixel patch 
 
 ## Must-Use for Training
 
-1. Scene Flow full set (FlyingThings3D, Driving, Monkaa)
-   - dense synthetic GT and high geometric diversity
-
-2. DrivingStereo
+1. DrivingStereo
    - very large real-world driving corpus (about 174k training frames)
 
-3. KITTI Stereo 2012 + KITTI Stereo 2015 training sets
+2. KITTI Stereo 2012 + KITTI Stereo 2015 training sets
    - real-domain benchmark supervision
+
+## Optional Synthetic Add-On
+
+3. Scene Flow full set (FlyingThings3D, Driving, Monkaa)
+   - optional synthetic diversity if local access is straightforward
 
 ## Evaluation-Only Initially
 
@@ -71,11 +73,11 @@ These are reserved for held-out generalization checks, not immediate training in
 
 Recommended effective sampling ratio in training:
 
-- 50% Scene Flow
-- 35% DrivingStereo
+- 85% DrivingStereo
 - 15% KITTI 2012/2015 combined
+- 0% Scene Flow by default
 
-This keeps synthetic diversity while continuously anchoring optimization on real data.
+This keeps optimization anchored on the fully available real-domain data. Scene Flow can be added later only if it improves coverage without complicating data acquisition.
 
 ## Stereo-Safe Augmentation Policy
 
@@ -132,7 +134,7 @@ Log and artifact naming cleanup:
 
 - model: low-resolution shared-feature correlation student
 - supervision: GT only
-- datasets: Scene Flow + DrivingStereo + KITTI 2012/2015
+- datasets: DrivingStereo + KITTI 2012/2015
 - no teacher checkpoints
 - no pseudo-label generation
 - no distillation targets
@@ -177,7 +179,7 @@ Out of scope:
 
 1. Dead-code removal PR scope list finalized and executed for teacher files.
 2. New student architecture implementation for low-resolution correlation path.
-3. Mixed-data training config and manifests for Scene Flow + DrivingStereo + KITTI.
+3. Mixed-data training config and manifests for DrivingStereo + KITTI, with optional Scene Flow support.
 4. Updated docs reflecting teacher-free architecture.
 5. New student checkpoint + metrics + hls4ml parity artifacts.
 

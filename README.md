@@ -51,23 +51,30 @@ uv run python v1/plot_depth.py --depth output/depth_out.hex --gt data/gt_dispari
 
 ## v2 real-data neural pipeline
 
-The primary `v2` path is now teacher-free. It trains a low-resolution full-frame correlation student directly from ground-truth disparity using mixed stereo datasets.
+The primary `v2` path is now teacher-free. It trains a low-resolution full-frame correlation student directly from ground-truth disparity using DrivingStereo-first mixed stereo datasets.
 
 Default data sources:
 
-- Scene Flow synthetic source: `olivermao/sceneflow`
 - KITTI validation source: `UniflexAI/mini_kitti`
-- DrivingStereo and KITTI 2012/2015 local-disk adapters for larger mixed runs
+- DrivingStereo main training source on local disk
+- KITTI 2012/2015 local-disk adapters for real-domain supervision
+- Optional Scene Flow synthetic source: `olivermao/sceneflow`
 
 Run a minimal end-to-end smoke pass:
 
 ```bash
 KERAS_BACKEND=torch uv run python -m v2.training.train_stereo \
     --run-name smoke_correlation \
-    --epochs 2 \
+    --driving-stereo-dir v2/data/raw/driving_stereo \
+    --kitti2015-dir v2/data/raw/kitti2015 \
+    --kitti2012-dir v2/data/raw/kitti2012 \
+    --driving-stereo-limit 16 \
+    --kitti2015-limit 8 \
+    --kitti2012-limit 8 \
+    --train-epoch-size 24 \
+    --epochs 1 \
     --batch-size 2 \
     --chunk-size 8 \
-    --sceneflow-limit 24 \
     --val-limit 4 \
     --no-augment
 ```
@@ -80,7 +87,25 @@ KERAS_BACKEND=torch CUDA_VISIBLE_DEVICES=0 uv run python -m v2.training.train_st
     --run-name full_mixed \
     --driving-stereo-dir v2/data/raw/driving_stereo \
     --kitti2015-dir v2/data/raw/kitti2015 \
-    --kitti2012-dir v2/data/raw/kitti2012
+    --kitti2012-dir v2/data/raw/kitti2012 \
+    --train-epoch-size 16384
+```
+
+Launch a longer GPU run inside tmux, capture stdout/stderr to a descriptive log,
+and record GPU/progress snapshots in a second tmux window:
+
+```bash
+scripts/run_train_tmux.sh --attach
+```
+
+Useful overrides:
+
+```bash
+scripts/run_train_tmux.sh \
+    --epochs 20 \
+    --batch-size 80 \
+    --learning-rate 3e-4 \
+    --train-epoch-size 32768
 ```
 
 Convert the trained student feature extractor with hls4ml and run parity checks:

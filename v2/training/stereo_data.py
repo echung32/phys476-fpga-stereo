@@ -17,6 +17,7 @@ Mixed-dataset manifests:
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
@@ -60,6 +61,15 @@ def get_sceneflow_manifest(
 
     Each manifest entry: {"source": "sceneflow", "left": ..., "right": ..., "disparity": ...}
     """
+    local_root = resolve_repo_path(dataset_id)
+    if local_root.exists():
+        entries = _build_sceneflow_local_manifest(local_root, split_tag=split.upper() if split else "")
+        tagged = [
+            {"source": "sceneflow_local", "root_dir": str(local_root), **e}
+            for e in entries
+        ]
+        return local_root, tagged
+
     cache_path = resolve_repo_path(cache_dir)
     cache_path.mkdir(parents=True, exist_ok=True)
     local_root = Path(
@@ -393,6 +403,25 @@ def load_example_from_manifest_entry(
             metadata={"source": "sceneflow", "dataset_id": sceneflow_dataset_id, "left_member": entry["left"]},
         )
 
+    if source == "sceneflow_local":
+        with Image.open(entry["left"]) as img:
+            left_image = _to_grayscale(np.array(img, dtype=np.float32)) / 255.0
+        with Image.open(entry["right"]) as img:
+            right_image = _to_grayscale(np.array(img, dtype=np.float32)) / 255.0
+        disparity = _read_pfm(Path(entry["disparity"]).read_bytes())
+        valid_mask = np.isfinite(disparity) & (disparity >= 0.0)
+        return StereoExample(
+            left_image=left_image,
+            right_image=right_image,
+            disparity=disparity,
+            valid_mask=valid_mask,
+            metadata={
+                "source": "sceneflow_local",
+                "root_dir": entry.get("root_dir", ""),
+                "left": entry["left"],
+            },
+        )
+
     if source in ("kitti2015", "kitti2012"):
         return load_kitti_disk_example(entry)
 
@@ -447,9 +476,19 @@ def build_mixed_manifest(
     if target_size == 0:
         target_size = min(int(len(p) / f) for p, f in pools)
 
+    counts = [int(target_size * frac) for _, frac in pools]
+    remainder = target_size - sum(counts)
+    if remainder > 0:
+        ranked = sorted(
+            enumerate(pools),
+            key=lambda item: (target_size * item[1][1]) - counts[item[0]],
+            reverse=True,
+        )
+        for index, _ in ranked[:remainder]:
+            counts[index] += 1
+
     mixed: list[dict[str, str]] = []
-    for pool, frac in pools:
-        n = int(target_size * frac)
+    for (pool, _), n in zip(pools, counts):
         if n == 0:
             continue
         indices = rng.choice(len(pool), size=n, replace=(n > len(pool)))
@@ -469,6 +508,7 @@ def iter_manifest_chunks(
     *,
     sceneflow_cache_dir: str | Path = "v2/data/raw/sceneflow",
     sceneflow_dataset_id: str = "olivermao/sceneflow",
+    loader_workers: int = 1,
 ) -> Iterator[list[StereoExample]]:
     """Yield StereoExample lists in chunks, opening SceneFlow tars once per chunk."""
     cache_path = resolve_repo_path(sceneflow_cache_dir)
@@ -496,14 +536,21 @@ def iter_manifest_chunks(
                         )
                     )
 
-        for entry in other_entries:
-            examples.append(
-                load_example_from_manifest_entry(
+        if other_entries:
+            effective_workers = max(1, min(loader_workers, len(other_entries)))
+
+            def _load_other_entry(entry: dict[str, str]) -> StereoExample:
+                return load_example_from_manifest_entry(
                     entry,
                     sceneflow_cache_dir=sceneflow_cache_dir,
                     sceneflow_dataset_id=sceneflow_dataset_id,
                 )
-            )
+
+            if effective_workers == 1:
+                examples.extend(_load_other_entry(entry) for entry in other_entries)
+            else:
+                with ThreadPoolExecutor(max_workers=effective_workers) as executor:
+                    examples.extend(executor.map(_load_other_entry, other_entries))
 
         yield examples
 
@@ -586,6 +633,48 @@ def _build_sceneflow_manifest(
 
     if not manifest_entries:
         raise ValueError(f"No Scene Flow examples found for split {split_tag!r}")
+    return manifest_entries
+
+
+def _build_sceneflow_local_manifest(root_dir: Path, *, split_tag: str) -> list[dict[str, str]]:
+    frame_roots = [
+        root_dir / "frames_cleanpass",
+        root_dir / "frames_clean",
+    ]
+    disp_root = root_dir / "disparity"
+
+    frame_root = next((path for path in frame_roots if path.exists()), None)
+    if frame_root is None or not disp_root.exists():
+        raise FileNotFoundError(
+            "Expected extracted Scene Flow layout under "
+            f"{root_dir} with frames_cleanpass/ or frames_clean/ plus disparity/"
+        )
+
+    manifest_entries: list[dict[str, str]] = []
+    for left_path in sorted(frame_root.rglob("*.png")):
+        left_rel = left_path.relative_to(frame_root)
+        left_rel_str = left_rel.as_posix()
+        upper_name = left_rel_str.upper()
+        if split_tag and f"/{split_tag}/" not in f"/{upper_name}/":
+            continue
+        if "/left/" not in f"/{left_rel_str}/":
+            continue
+
+        right_rel = Path(left_rel_str.replace("/left/", "/right/", 1))
+        disp_rel = Path(_guess_sceneflow_disparity_name(left_rel_str))
+        right_path = frame_root / right_rel
+        disp_path = disp_root / disp_rel
+        if right_path.exists() and disp_path.exists():
+            manifest_entries.append(
+                {
+                    "left": str(left_path),
+                    "right": str(right_path),
+                    "disparity": str(disp_path),
+                }
+            )
+
+    if not manifest_entries:
+        raise ValueError(f"No extracted Scene Flow examples found under {root_dir}")
     return manifest_entries
 
 

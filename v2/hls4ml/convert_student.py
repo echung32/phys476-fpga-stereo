@@ -35,7 +35,11 @@ import keras
 import numpy as np
 import yaml
 
-from v2.models.keras_student import CorrelationCostVolume
+from v2.models.keras_student import (
+    CorrelationCostVolume,
+    _masked_smooth_l1,
+    _mean_abs_error_valid,
+)
 from v2.training.hf_utils import resolve_repo_path
 
 
@@ -95,7 +99,12 @@ def main() -> None:
     print(f"Loading model from {model_path} …", flush=True)
     full_model = keras.models.load_model(
         model_path,
-        custom_objects={"CorrelationCostVolume": CorrelationCostVolume},
+        custom_objects={
+            "CorrelationCostVolume": CorrelationCostVolume,
+            "_masked_smooth_l1": _masked_smooth_l1,
+            "_mean_abs_error_valid": _mean_abs_error_valid,
+        },
+        compile=False,
     )
 
     if args.export_full:

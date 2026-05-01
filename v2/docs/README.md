@@ -6,7 +6,7 @@ The primary path is:
 
 - direct ground-truth supervision with no teacher or distillation stage
 - a low-resolution shared-feature correlation student model
-- mixed-dataset training across Scene Flow, DrivingStereo, and KITTI
+- mixed-dataset training led by DrivingStereo with KITTI support and optional Scene Flow
 - hls4ml conversion and parity checks on the extracted feature encoder
 
 ## Implemented pieces
@@ -38,10 +38,16 @@ Minimal validated run:
 ```bash
 KERAS_BACKEND=torch uv run python -m v2.training.train_stereo \
 	--run-name smoke_correlation \
-	--epochs 2 \
+	--driving-stereo-dir v2/data/raw/driving_stereo \
+	--kitti2015-dir v2/data/raw/kitti2015 \
+	--kitti2012-dir v2/data/raw/kitti2012 \
+	--driving-stereo-limit 16 \
+	--kitti2015-limit 8 \
+	--kitti2012-limit 8 \
+	--train-epoch-size 24 \
+	--epochs 1 \
 	--batch-size 2 \
 	--chunk-size 8 \
-	--sceneflow-limit 24 \
 	--val-limit 4 \
 	--no-augment
 ```
@@ -53,7 +59,8 @@ KERAS_BACKEND=torch CUDA_VISIBLE_DEVICES=0 uv run python -m v2.training.train_st
 	--run-name full_mixed \
 	--driving-stereo-dir v2/data/raw/driving_stereo \
 	--kitti2015-dir v2/data/raw/kitti2015 \
-	--kitti2012-dir v2/data/raw/kitti2012
+	--kitti2012-dir v2/data/raw/kitti2012 \
+	--train-epoch-size 16384
 ```
 
 ## hls4ml conversion
@@ -72,10 +79,10 @@ KERAS_BACKEND=torch uv run python -m v2.hls4ml.convert_student \
 
 ## Current dataset path
 
-- Scene Flow synthetic training: `olivermao/sceneflow`
 - KITTI validation: `UniflexAI/mini_kitti`
 - DrivingStereo local root: `v2/data/raw/driving_stereo`
 - KITTI 2015 local root: `v2/data/raw/kitti2015`
 - KITTI 2012 local root: `v2/data/raw/kitti2012`
+- Optional Scene Flow synthetic training: `olivermao/sceneflow`
 
-The smoke training path is validated in this workspace. Scene Flow streaming and mixed-manifest loading are implemented and ready for larger runs once local datasets finish downloading and extracting.
+The smoke training path is validated in this workspace. The active default path no longer depends on Scene Flow; larger runs can proceed directly from DrivingStereo plus KITTI, with Scene Flow available only as an optional synthetic add-on.
