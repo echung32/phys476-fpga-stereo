@@ -8,7 +8,7 @@ Usage (DrivingStereo-first smoke test):
         --kitti2012-dir v2/data/raw/kitti2012 \
         --driving-stereo-limit 16 --kitti2015-limit 8 --kitti2012-limit 8 \
         --train-epoch-size 24 --chunk-size 8 --epochs 1 --batch-size 2 \
-        --val-limit 4 --no-augment
+        --val-limit 4 --input-color grayscale --no-augment
 
 Usage (full mixed run):
     KERAS_BACKEND=torch CUDA_VISIBLE_DEVICES=0 uv run python -m v2.training.train_stereo \
@@ -35,7 +35,12 @@ import keras
 import numpy as np
 
 from v2.models.keras_student import build_correlation_student
-from v2.training.augmentation import AugmentConfig, augment, crop_resize_to_shape, resize_to_shape
+from v2.training.augmentation import (
+    AugmentConfig,
+    augment,
+    crop_resize_to_shape,
+    resize_to_shape,
+)
 from v2.training.hf_utils import resolve_repo_path
 from v2.training.stereo_data import (
     StereoExample,
@@ -54,6 +59,7 @@ from v2.training.stereo_data import (
 # Config dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class TrainConfig:
     run_name: str
@@ -63,12 +69,12 @@ class TrainConfig:
     driving_stereo_dir: str
     kitti2015_dir: str
     kitti2012_dir: str
-    sceneflow_limit: int        # 0 = use all
-    driving_stereo_limit: int   # 0 = use all
-    kitti2015_limit: int        # 0 = use all
-    kitti2012_limit: int        # 0 = use all
+    sceneflow_limit: int  # 0 = use all
+    driving_stereo_limit: int  # 0 = use all
+    kitti2015_limit: int  # 0 = use all
+    kitti2012_limit: int  # 0 = use all
     kitti_hf_limit: int
-    val_limit: int              # 0 = full split
+    val_limit: int  # 0 = full split
     driving_holdout_limit: int  # 0 = disable extra same-domain holdout validation
     sceneflow_holdout_limit: int  # 0 = disable synthetic holdout validation
     target_height: int
@@ -78,15 +84,16 @@ class TrainConfig:
     learning_rate: float
     epochs: int
     batch_size: int
-    chunk_size: int             # examples per training chunk (SceneFlow streaming)
-    loader_workers: int         # parallel disk/example loading workers for local datasets
-    train_epoch_size: int       # 0 = max drawable without replacement
+    chunk_size: int  # examples per training chunk (SceneFlow streaming)
+    loader_workers: int  # parallel disk/example loading workers for local datasets
+    train_epoch_size: int  # 0 = max drawable without replacement
     augment: bool
     seed: int
     # Sampling fractions for mixed manifest
     sceneflow_frac: float
     driving_stereo_frac: float
     kitti_frac: float
+    input_color: str = "grayscale"
     input_fit_mode: str = "pad"
 
 
@@ -94,12 +101,14 @@ class TrainConfig:
 # Tensor-building helpers
 # ---------------------------------------------------------------------------
 
+
 def _prepare_inputs(
     examples: list[StereoExample],
     *,
     target_h: int,
     target_w: int,
     max_disp: int,
+    input_color: str = "grayscale",
     fit_mode: str = "pad",
     aug_config: AugmentConfig | None,
     rng: np.random.Generator,
@@ -113,27 +122,51 @@ def _prepare_inputs(
     """
     lefts, rights, y_trues = [], [], []
     for ex in examples:
-        left  = ex.left_image
+        left = ex.left_image
         right = ex.right_image
-        disp  = ex.disparity
+        disp = ex.disparity
         valid = ex.valid_mask.astype(np.float32)
+
+        if input_color != "grayscale":
+            raise ValueError(
+                f"Unsupported input color mode: {input_color}. "
+                "Only grayscale is currently supported."
+            )
+
+        # Ensure single-channel grayscale tensors even if upstream loaders change.
+        if left.ndim == 3:
+            left = left.mean(axis=-1)
+        if right.ndim == 3:
+            right = right.mean(axis=-1)
 
         if aug_config is not None:
             left, right, disp, valid_bool = augment(
-                left, right, disp, valid.astype(bool),
-                config=aug_config, rng=rng,
+                left,
+                right,
+                disp,
+                valid.astype(bool),
+                config=aug_config,
+                rng=rng,
             )
             valid = valid_bool.astype(np.float32)
 
         if fit_mode == "pad":
             left, right, disp, valid_bool = resize_to_shape(
-                left, right, disp, valid.astype(bool),
-                out_h=target_h, out_w=target_w,
+                left,
+                right,
+                disp,
+                valid.astype(bool),
+                out_h=target_h,
+                out_w=target_w,
             )
         elif fit_mode == "crop":
             left, right, disp, valid_bool = crop_resize_to_shape(
-                left, right, disp, valid.astype(bool),
-                out_h=target_h, out_w=target_w,
+                left,
+                right,
+                disp,
+                valid.astype(bool),
+                out_h=target_h,
+                out_w=target_w,
             )
         else:
             raise ValueError(f"Unsupported input fit mode: {fit_mode}")
@@ -143,14 +176,14 @@ def _prepare_inputs(
         valid = valid * (disp < max_disp).astype(np.float32)
         disp = np.clip(disp, 0.0, max_disp - 1.0)
 
-        lefts.append(left[..., np.newaxis])   # (H, W, 1)
+        lefts.append(left[..., np.newaxis])  # (H, W, 1)
         rights.append(right[..., np.newaxis])
         y_true = np.stack([disp, valid], axis=-1)  # (H, W, 2)
         y_trues.append(y_true)
 
     return (
-        np.stack(lefts,   axis=0).astype(np.float32),
-        np.stack(rights,  axis=0).astype(np.float32),
+        np.stack(lefts, axis=0).astype(np.float32),
+        np.stack(rights, axis=0).astype(np.float32),
         np.stack(y_trues, axis=0).astype(np.float32),
     )
 
@@ -158,6 +191,7 @@ def _prepare_inputs(
 # ---------------------------------------------------------------------------
 # Training loop
 # ---------------------------------------------------------------------------
+
 
 def _train_on_chunk(
     model: keras.Model,
@@ -173,6 +207,7 @@ def _train_on_chunk(
         target_h=config.target_height,
         target_w=config.target_width,
         max_disp=config.max_disp,
+        input_color=config.input_color,
         fit_mode=config.input_fit_mode,
         aug_config=aug_config,
         rng=rng,
@@ -199,8 +234,9 @@ def _evaluate(
         target_h=config.target_height,
         target_w=config.target_width,
         max_disp=config.max_disp,
+        input_color=config.input_color,
         fit_mode=config.input_fit_mode,
-        aug_config=None,   # no augmentation during evaluation
+        aug_config=None,  # no augmentation during evaluation
         rng=rng,
     )
     result = model.evaluate(
@@ -228,7 +264,11 @@ def _select_holdout_manifest(
         return []
 
     seen_keys = {_manifest_entry_key(entry) for entry in seen_manifest}
-    candidates = [entry for entry in source_manifest if _manifest_entry_key(entry) not in seen_keys]
+    candidates = [
+        entry
+        for entry in source_manifest
+        if _manifest_entry_key(entry) not in seen_keys
+    ]
     if not candidates:
         return []
     if limit >= len(candidates):
@@ -264,7 +304,11 @@ def _exclude_manifest_entries(
     if not source_manifest:
         return []
     excluded_keys = {_manifest_entry_key(entry) for entry in excluded_manifest}
-    return [entry for entry in source_manifest if _manifest_entry_key(entry) not in excluded_keys]
+    return [
+        entry
+        for entry in source_manifest
+        if _manifest_entry_key(entry) not in excluded_keys
+    ]
 
 
 def _save_parity_batch(
@@ -279,6 +323,7 @@ def _save_parity_batch(
         target_h=config.target_height,
         target_w=config.target_width,
         max_disp=config.max_disp,
+        input_color=config.input_color,
         fit_mode=config.input_fit_mode,
         aug_config=None,
         rng=rng,
@@ -296,57 +341,99 @@ def _save_parity_batch(
 # Main entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train the correlation student stereo model")
+    parser = argparse.ArgumentParser(
+        description="Train the correlation student stereo model"
+    )
     # Dataset sources
     parser.add_argument(
         "--sceneflow-dataset",
         default="",
         help="HF Scene Flow dataset id or local extracted Scene Flow root (empty = skip)",
     )
-    parser.add_argument("--kitti-hf-dataset",   default="UniflexAI/mini_kitti")
-    parser.add_argument("--driving-stereo-dir", default="",  help="Local root of DrivingStereo (empty = skip)")
-    parser.add_argument("--kitti2015-dir",      default="",  help="Local root of KITTI 2015 (empty = skip)")
-    parser.add_argument("--kitti2012-dir",      default="",  help="Local root of KITTI 2012 (empty = skip)")
+    parser.add_argument("--kitti-hf-dataset", default="UniflexAI/mini_kitti")
+    parser.add_argument(
+        "--driving-stereo-dir",
+        default="",
+        help="Local root of DrivingStereo (empty = skip)",
+    )
+    parser.add_argument(
+        "--kitti2015-dir", default="", help="Local root of KITTI 2015 (empty = skip)"
+    )
+    parser.add_argument(
+        "--kitti2012-dir", default="", help="Local root of KITTI 2012 (empty = skip)"
+    )
     # Dataset limits
-    parser.add_argument("--sceneflow-limit",    type=int, default=0)
+    parser.add_argument("--sceneflow-limit", type=int, default=0)
     parser.add_argument("--driving-stereo-limit", type=int, default=0)
-    parser.add_argument("--kitti2015-limit",    type=int, default=0)
-    parser.add_argument("--kitti2012-limit",    type=int, default=0)
-    parser.add_argument("--kitti-hf-limit",     type=int, default=88)
-    parser.add_argument("--val-limit",          type=int, default=0,
-                        help="Validation examples from the HF split (0 = full split)")
-    parser.add_argument("--driving-holdout-limit", type=int, default=512,
-                        help="Unseen DrivingStereo holdout examples for extra validation (0 = disable)")
-    parser.add_argument("--sceneflow-holdout-limit", type=int, default=1024,
-                        help="Unseen Scene Flow holdout examples for extra validation (0 = disable)")
+    parser.add_argument("--kitti2015-limit", type=int, default=0)
+    parser.add_argument("--kitti2012-limit", type=int, default=0)
+    parser.add_argument("--kitti-hf-limit", type=int, default=88)
+    parser.add_argument(
+        "--val-limit",
+        type=int,
+        default=0,
+        help="Validation examples from the HF split (0 = full split)",
+    )
+    parser.add_argument(
+        "--driving-holdout-limit",
+        type=int,
+        default=512,
+        help="Unseen DrivingStereo holdout examples for extra validation (0 = disable)",
+    )
+    parser.add_argument(
+        "--sceneflow-holdout-limit",
+        type=int,
+        default=1024,
+        help="Unseen Scene Flow holdout examples for extra validation (0 = disable)",
+    )
     # Model
-    parser.add_argument("--target-height",      type=int, default=96)
-    parser.add_argument("--target-width",       type=int, default=320)
-    parser.add_argument("--input-fit-mode",     choices=["pad", "crop"], default="pad",
-                        help="How to fit source images to the fixed model shape")
-    parser.add_argument("--max-disp",           type=int, default=48)
-    parser.add_argument("--feature-channels",   type=int, default=16)
-    parser.add_argument("--learning-rate",      type=float, default=1e-3)
+    parser.add_argument("--target-height", type=int, default=96)
+    parser.add_argument("--target-width", type=int, default=320)
+    parser.add_argument(
+        "--input-color",
+        choices=["grayscale"],
+        default="grayscale",
+        help="Input color mode for training/eval preprocessing",
+    )
+    parser.add_argument(
+        "--input-fit-mode",
+        choices=["pad", "crop"],
+        default="pad",
+        help="How to fit source images to the fixed model shape",
+    )
+    parser.add_argument("--max-disp", type=int, default=48)
+    parser.add_argument("--feature-channels", type=int, default=16)
+    parser.add_argument("--learning-rate", type=float, default=1e-3)
     # Training
-    parser.add_argument("--epochs",             type=int, default=10)
-    parser.add_argument("--batch-size",         type=int, default=4)
-    parser.add_argument("--chunk-size",         type=int, default=256,
-                        help="Examples per training chunk")
-    parser.add_argument("--loader-workers",     type=int, default=8,
-                        help="Parallel workers for local-disk example loading (1 = disable)")
-    parser.add_argument("--train-epoch-size",   type=int, default=16384,
-                        help="Mixed-train examples per epoch (0 = max drawable without replacement)")
-    parser.add_argument("--no-augment",         action="store_true")
-    parser.add_argument("--seed",               type=int, default=0)
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument(
+        "--chunk-size", type=int, default=256, help="Examples per training chunk"
+    )
+    parser.add_argument(
+        "--loader-workers",
+        type=int,
+        default=8,
+        help="Parallel workers for local-disk example loading (1 = disable)",
+    )
+    parser.add_argument(
+        "--train-epoch-size",
+        type=int,
+        default=16384,
+        help="Mixed-train examples per epoch (0 = max drawable without replacement)",
+    )
+    parser.add_argument("--no-augment", action="store_true")
+    parser.add_argument("--seed", type=int, default=0)
     # Sampling fractions
-    parser.add_argument("--sceneflow-frac",     type=float, default=0.0)
-    parser.add_argument("--driving-stereo-frac",type=float, default=0.85)
-    parser.add_argument("--kitti-frac",         type=float, default=0.15)
+    parser.add_argument("--sceneflow-frac", type=float, default=0.0)
+    parser.add_argument("--driving-stereo-frac", type=float, default=0.85)
+    parser.add_argument("--kitti-frac", type=float, default=0.15)
     # Output
-    parser.add_argument("--output-root",        default="logs")
-    parser.add_argument("--run-name",           default="correlation_stereo")
-    parser.add_argument("--output-dir",         default="")
+    parser.add_argument("--output-root", default="logs")
+    parser.add_argument("--run-name", default="correlation_stereo")
+    parser.add_argument("--output-dir", default="")
     args = parser.parse_args()
 
     # --- output directory ---
@@ -354,11 +441,16 @@ def main() -> None:
         run_dir = resolve_repo_path(args.output_dir)
     else:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        run_dir = resolve_repo_path(Path(args.output_root) / f"{timestamp}_{args.run_name}")
+        run_dir = resolve_repo_path(
+            Path(args.output_root) / f"{timestamp}_{args.run_name}"
+        )
     run_dir.mkdir(parents=True, exist_ok=True)
-    ckpt_dir     = run_dir / "checkpoints";  ckpt_dir.mkdir(exist_ok=True)
-    manifest_dir = run_dir / "manifests";    manifest_dir.mkdir(exist_ok=True)
-    hls_dir      = run_dir / "hls4ml";       hls_dir.mkdir(exist_ok=True)
+    ckpt_dir = run_dir / "checkpoints"
+    ckpt_dir.mkdir(exist_ok=True)
+    manifest_dir = run_dir / "manifests"
+    manifest_dir.mkdir(exist_ok=True)
+    hls_dir = run_dir / "hls4ml"
+    hls_dir.mkdir(exist_ok=True)
 
     config = TrainConfig(
         run_name=args.run_name,
@@ -378,6 +470,7 @@ def main() -> None:
         sceneflow_holdout_limit=args.sceneflow_holdout_limit,
         target_height=args.target_height,
         target_width=args.target_width,
+        input_color=args.input_color,
         input_fit_mode=args.input_fit_mode,
         max_disp=args.max_disp,
         feature_channels=args.feature_channels,
@@ -393,7 +486,9 @@ def main() -> None:
         driving_stereo_frac=args.driving_stereo_frac,
         kitti_frac=args.kitti_frac,
     )
-    (run_dir / "run_config.json").write_text(json.dumps(asdict(config), indent=2), encoding="utf-8")
+    (run_dir / "run_config.json").write_text(
+        json.dumps(asdict(config), indent=2), encoding="utf-8"
+    )
     print(f"Run directory: {run_dir}", flush=True)
 
     rng = np.random.default_rng(config.seed)
@@ -468,7 +563,9 @@ def main() -> None:
     val_examples = load_kitti_hf_examples(
         config.kitti_hf_dataset, split="validation", max_examples=config.val_limit
     )
-    write_manifest(manifest_dir / "validation_manifest.json", [e.metadata for e in val_examples])
+    write_manifest(
+        manifest_dir / "validation_manifest.json", [e.metadata for e in val_examples]
+    )
     print(f"  External validation: {len(val_examples)} examples", flush=True)
 
     driving_holdout_manifest = _select_holdout_manifest(
@@ -483,8 +580,13 @@ def main() -> None:
         config=config,
     )
     if driving_holdout_manifest:
-        write_manifest(manifest_dir / "driving_holdout_manifest.json", driving_holdout_manifest)
-        print(f"  Driving holdout validation: {len(driving_holdout_examples)} examples", flush=True)
+        write_manifest(
+            manifest_dir / "driving_holdout_manifest.json", driving_holdout_manifest
+        )
+        print(
+            f"  Driving holdout validation: {len(driving_holdout_examples)} examples",
+            flush=True,
+        )
     else:
         print("  Driving holdout validation: disabled or unavailable", flush=True)
 
@@ -494,21 +596,33 @@ def main() -> None:
         limit=config.sceneflow_holdout_limit,
         rng=np.random.default_rng(config.seed + 23),
     )
-    train_sceneflow_manifest = _exclude_manifest_entries(sceneflow_manifest, sceneflow_holdout_manifest)
+    train_sceneflow_manifest = _exclude_manifest_entries(
+        sceneflow_manifest, sceneflow_holdout_manifest
+    )
     sceneflow_holdout_examples = _load_manifest_examples(
         sceneflow_holdout_manifest,
         config=config,
     )
     if sceneflow_holdout_manifest:
-        write_manifest(manifest_dir / "sceneflow_holdout_manifest.json", sceneflow_holdout_manifest)
-        print(f"  Scene Flow holdout validation: {len(sceneflow_holdout_examples)} examples", flush=True)
+        write_manifest(
+            manifest_dir / "sceneflow_holdout_manifest.json", sceneflow_holdout_manifest
+        )
+        print(
+            f"  Scene Flow holdout validation: {len(sceneflow_holdout_examples)} examples",
+            flush=True,
+        )
     else:
         print("  Scene Flow holdout validation: disabled or unavailable", flush=True)
 
     if train_ds_manifest:
-        print(f"  DrivingStereo train pool: {len(train_ds_manifest)} examples", flush=True)
+        print(
+            f"  DrivingStereo train pool: {len(train_ds_manifest)} examples", flush=True
+        )
     if train_sceneflow_manifest:
-        print(f"  Scene Flow train pool: {len(train_sceneflow_manifest)} examples", flush=True)
+        print(
+            f"  Scene Flow train pool: {len(train_sceneflow_manifest)} examples",
+            flush=True,
+        )
 
     # --- training loop ---
     training_log: list[dict[str, float | int]] = []
@@ -534,8 +648,8 @@ def main() -> None:
         write_manifest(manifest_dir / "mixed_train_manifest.json", mixed_manifest)
         print(f"  Mixed train: {len(mixed_manifest)} entries", flush=True)
         epoch_losses: list[float] = []
-        epoch_maes:   list[float] = []
-        chunk_count   = 0
+        epoch_maes: list[float] = []
+        chunk_count = 0
         example_count = 0
 
         for chunk_examples in iter_manifest_chunks(
@@ -544,10 +658,13 @@ def main() -> None:
             loader_workers=config.loader_workers,
         ):
             metrics = _train_on_chunk(
-                model, chunk_examples,
-                config=config, aug_config=aug_config, rng=rng,
+                model,
+                chunk_examples,
+                config=config,
+                aug_config=aug_config,
+                rng=rng,
             )
-            chunk_count   += 1
+            chunk_count += 1
             example_count += len(chunk_examples)
             epoch_losses.append(metrics.get("loss", float("nan")))
             epoch_maes.append(metrics.get("_mean_abs_error_valid", float("nan")))
@@ -558,12 +675,15 @@ def main() -> None:
             )
 
         train_loss = float(np.nanmean(epoch_losses))
-        train_mae  = float(np.nanmean(epoch_maes))
+        train_mae = float(np.nanmean(epoch_maes))
 
         # Validation
         val_metrics = _evaluate(model, val_examples, config=config, rng=rng)
         val_mae = val_metrics.get("_mean_abs_error_valid", float("nan"))
-        driving_holdout_metrics = {"loss": float("nan"), "_mean_abs_error_valid": float("nan")}
+        driving_holdout_metrics = {
+            "loss": float("nan"),
+            "_mean_abs_error_valid": float("nan"),
+        }
         if driving_holdout_examples:
             driving_holdout_metrics = _evaluate(
                 model,
@@ -571,8 +691,13 @@ def main() -> None:
                 config=config,
                 rng=rng,
             )
-        driving_holdout_mae = driving_holdout_metrics.get("_mean_abs_error_valid", float("nan"))
-        sceneflow_holdout_metrics = {"loss": float("nan"), "_mean_abs_error_valid": float("nan")}
+        driving_holdout_mae = driving_holdout_metrics.get(
+            "_mean_abs_error_valid", float("nan")
+        )
+        sceneflow_holdout_metrics = {
+            "loss": float("nan"),
+            "_mean_abs_error_valid": float("nan"),
+        }
         if sceneflow_holdout_examples:
             sceneflow_holdout_metrics = _evaluate(
                 model,
@@ -580,18 +705,22 @@ def main() -> None:
                 config=config,
                 rng=rng,
             )
-        sceneflow_holdout_mae = sceneflow_holdout_metrics.get("_mean_abs_error_valid", float("nan"))
+        sceneflow_holdout_mae = sceneflow_holdout_metrics.get(
+            "_mean_abs_error_valid", float("nan")
+        )
 
         row = {
             "epoch": epoch,
             "train_loss": train_loss,
-            "train_mae":  train_mae,
-            "val_loss":   val_metrics.get("loss", float("nan")),
-            "val_mae":    val_mae,
+            "train_mae": train_mae,
+            "val_loss": val_metrics.get("loss", float("nan")),
+            "val_mae": val_mae,
             "driving_holdout_loss": driving_holdout_metrics.get("loss", float("nan")),
-            "driving_holdout_mae":  driving_holdout_mae,
-            "sceneflow_holdout_loss": sceneflow_holdout_metrics.get("loss", float("nan")),
-            "sceneflow_holdout_mae":  sceneflow_holdout_mae,
+            "driving_holdout_mae": driving_holdout_mae,
+            "sceneflow_holdout_loss": sceneflow_holdout_metrics.get(
+                "loss", float("nan")
+            ),
+            "sceneflow_holdout_mae": sceneflow_holdout_mae,
         }
         training_log.append(row)
 
@@ -615,7 +744,10 @@ def main() -> None:
         if val_mae < best_val_mae:
             best_val_mae = val_mae
             model.save(str(ckpt_dir / "best.keras"))
-            print(f"  ** New best val MAE: {best_val_mae:.4f} — saved best.keras **", flush=True)
+            print(
+                f"  ** New best val MAE: {best_val_mae:.4f} — saved best.keras **",
+                flush=True,
+            )
 
     csv_file.close()
 
