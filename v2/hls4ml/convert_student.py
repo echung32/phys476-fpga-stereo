@@ -26,7 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from pathlib import Path
+from typing import Any
 
 os.environ.setdefault("KERAS_BACKEND", "torch")
 
@@ -53,7 +53,6 @@ def extract_feature_extractor(full_model: keras.Model) -> keras.Model:
     The extractor maps (H, W, 1) → (H, W, C/2) and uses the same weights as
     the trained full-frame model.  It is the only part exported to hls4ml.
     """
-    feat_layer_names = ["feat_conv1", "feat_conv2", "feat_conv3"]
     # Build a new functional model using the same layer objects (shared weights)
     try:
         conv1 = full_model.get_layer("feat_conv1")
@@ -74,6 +73,22 @@ def extract_feature_extractor(full_model: keras.Model) -> keras.Model:
     return keras.Model(inputs=inp, outputs=out, name="feature_extractor")
 
 
+def apply_reuse_settings(
+    config: dict[str, Any],
+    model: keras.Model,
+    reuse_factor: int,
+    strategy: str,
+) -> None:
+    """Apply reuse/strategy settings to Conv2D layers in-place."""
+    layer_cfg = config.setdefault("LayerName", {})
+
+    for layer in model.layers:
+        if isinstance(layer, keras.layers.Conv2D):
+            cfg = layer_cfg.setdefault(layer.name, {})
+            cfg["ReuseFactor"] = reuse_factor
+            cfg["Strategy"] = strategy
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -87,6 +102,14 @@ def main() -> None:
     parser.add_argument("--output-dir",   default="v2/hls4ml/student_hls")
     parser.add_argument("--backend",      default="Vitis")
     parser.add_argument("--precision",    default="fixed<16,6>")
+    parser.add_argument("--part",         default="xc7a200tfbg484-1",
+                        help="Xilinx part string passed to Vitis HLS (default: Artix-7 XC7A200T)")
+    parser.add_argument("--clock-period", default=10, type=int,
+                        help="Target clock period in ns (default: 10 ns = 100 MHz)")
+    parser.add_argument("--reuse-factor", default=1, type=int,
+                        help="ReuseFactor applied to Conv2D layers (default: 1)")
+    parser.add_argument("--strategy", default="Latency", choices=["Latency", "Resource"],
+                        help="hls4ml layer strategy applied to Conv2D layers")
     parser.add_argument("--export-full",  action="store_true",
                         help="Attempt to export the full model instead of just the extractor "
                              "(may fail for large input sizes)")
@@ -124,6 +147,7 @@ def main() -> None:
         backend=args.backend,
         default_precision=args.precision,
     )
+    apply_reuse_settings(config, export_model, args.reuse_factor, args.strategy)
     config_path = output_dir / "hls_config.yaml"
     config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
     print(f"Saved hls4ml config to {config_path}", flush=True)
@@ -134,6 +158,8 @@ def main() -> None:
         backend=args.backend,
         io_type="io_stream",
         hls_config=config,
+        part=args.part,
+        clock_period=args.clock_period,
     )
     hls_model.compile()
     print("hls4ml compilation successful.", flush=True)
