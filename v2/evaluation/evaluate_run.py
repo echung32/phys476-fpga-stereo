@@ -35,8 +35,6 @@ from v2.training.train_stereo import TrainConfig, _prepare_inputs
 def _load_run_config(run_dir: Path) -> TrainConfig:
     config_data = json.loads((run_dir / "run_config.json").read_text(encoding="utf-8"))
     config_data.setdefault("driving_holdout_limit", 0)
-    config_data.setdefault("sceneflow_holdout_limit", 0)
-    config_data.setdefault("input_fit_mode", "pad")
     return TrainConfig(**config_data)
 
 
@@ -76,30 +74,6 @@ def _select_driving_holdout(
     if limit > 0:
         indices = indices[:limit]
     return [holdout_entries[int(index)] for index in indices]
-
-
-def _load_saved_holdout_manifest(
-    manifests_dir: Path,
-    manifest_name: str,
-    *,
-    limit: int,
-    seed: int,
-) -> list[dict] | None:
-    manifest_path = manifests_dir / manifest_name
-    if not manifest_path.exists():
-        return None
-
-    entries = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if not entries:
-        return []
-    if limit <= 0 or limit >= len(entries):
-        return entries
-
-    rng = np.random.default_rng(seed)
-    indices = np.arange(len(entries))
-    rng.shuffle(indices)
-    indices = indices[:limit]
-    return [entries[int(index)] for index in indices]
 
 
 def _update_metric_sums(metric_sums: dict[str, float], y_true_batch: np.ndarray, y_pred_batch: np.ndarray) -> None:
@@ -151,7 +125,6 @@ def _sample_summary(example: StereoExample, y_true: np.ndarray, y_pred: np.ndarr
 
 def _save_sample_panel(
     output_path: Path,
-    left_image: np.ndarray,
     example: StereoExample,
     y_true: np.ndarray,
     y_pred: np.ndarray,
@@ -170,7 +143,7 @@ def _save_sample_panel(
     max_err = float(np.nanpercentile(masked_err, 99)) if np.count_nonzero(valid) else 1.0
 
     figure, axes = plt.subplots(1, 4, figsize=(16, 4), constrained_layout=True)
-    axes[0].imshow(left_image, cmap="gray", vmin=0.0, vmax=1.0)
+    axes[0].imshow(example.left_image, cmap="gray", vmin=0.0, vmax=1.0)
     axes[0].set_title("Left")
     axes[1].imshow(masked_gt, cmap="magma", vmin=0.0, vmax=max_disp)
     axes[1].set_title("Ground Truth")
@@ -216,19 +189,7 @@ def _evaluate_examples(
         "bad5_sum": 0.0,
     }
     sample_summaries: list[dict[str, object]] = []
-    prep_rng = np.random.default_rng(rng_seed)
-    sample_indices: list[int] = []
-    if sample_count > 0 and examples:
-        sample_rng = np.random.default_rng(rng_seed + 1)
-        sample_indices = sorted(
-            int(index)
-            for index in sample_rng.choice(
-                len(examples),
-                size=min(sample_count, len(examples)),
-                replace=False,
-            )
-        )
-    sample_cursor = 0
+    rng = np.random.default_rng(rng_seed)
 
     for offset in range(0, len(examples), batch_size):
         chunk_examples = examples[offset : offset + batch_size]
@@ -238,7 +199,7 @@ def _evaluate_examples(
             target_w=config.target_width,
             max_disp=config.max_disp,
             aug_config=None,
-            rng=prep_rng,
+            rng=rng,
         )
         y_pred_batch = model.predict(
             {"left": left_batch, "right": right_batch},
@@ -248,23 +209,20 @@ def _evaluate_examples(
 
         _update_metric_sums(metric_sums, y_true_batch, y_pred_batch)
 
-        while sample_cursor < len(sample_indices):
-            global_index = sample_indices[sample_cursor]
-            if global_index >= offset + len(chunk_examples):
+        while len(sample_summaries) < sample_count and len(sample_summaries) < len(examples):
+            local_index = len(sample_summaries) - offset
+            if local_index < 0 or local_index >= len(chunk_examples):
                 break
-            local_index = global_index - offset
             panel_path = sample_dir / f"{sample_prefix}_{len(sample_summaries):02d}.png"
             sample_summaries.append(
                 _save_sample_panel(
                     panel_path,
-                    left_batch[local_index, ..., 0],
                     chunk_examples[local_index],
                     y_true_batch[local_index],
                     y_pred_batch[local_index],
                     title=f"{sample_prefix} sample {len(sample_summaries)}",
                 )
             )
-            sample_cursor += 1
 
     return {
         "metrics": _finalize_metric_sums(metric_sums),
@@ -319,20 +277,11 @@ def main() -> None:
     config = _load_run_config(run_dir)
     model = _load_model(checkpoint_path)
 
-    manifests_dir = run_dir / "manifests"
-
-    driving_holdout_entries = _load_saved_holdout_manifest(
-        manifests_dir,
-        "driving_holdout_manifest.json",
+    driving_holdout_entries = _select_driving_holdout(
+        run_dir / "manifests",
         limit=args.driving_holdout_limit,
         seed=config.seed + 17,
     )
-    if driving_holdout_entries is None:
-        driving_holdout_entries = _select_driving_holdout(
-            manifests_dir,
-            limit=args.driving_holdout_limit,
-            seed=config.seed + 17,
-        )
     driving_result = _evaluate_manifest_entries(
         model,
         driving_holdout_entries,
@@ -359,13 +308,6 @@ def main() -> None:
         rng_seed=config.seed + 29,
     )
 
-    sceneflow_holdout_entries = _load_saved_holdout_manifest(
-        manifests_dir,
-        "sceneflow_holdout_manifest.json",
-        limit=config.sceneflow_holdout_limit,
-        seed=config.seed + 23,
-    )
-
     report = {
         "run_dir": str(run_dir),
         "checkpoint": str(checkpoint_path),
@@ -379,20 +321,6 @@ def main() -> None:
             **mini_kitti_result,
         },
     }
-    if sceneflow_holdout_entries is not None:
-        sceneflow_result = _evaluate_manifest_entries(
-            model,
-            sceneflow_holdout_entries,
-            config=config,
-            sample_dir=output_dir / "samples" / "sceneflow_holdout",
-            sample_prefix="sceneflow_holdout",
-            sample_count=args.sample_count,
-            chunk_size=args.eval_chunk_size,
-        )
-        report["sceneflow_holdout"] = {
-            "selected_examples": len(sceneflow_holdout_entries),
-            **sceneflow_result,
-        }
     report_path = output_dir / "evaluation_report.json"
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))

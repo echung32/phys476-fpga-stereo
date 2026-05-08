@@ -14,12 +14,13 @@ Launcher flags:
   --session-name NAME        Override the tmux session name (defaults to run name)
   --gpu ID                   GPU index to use (default: 1)
   --epochs N                 Epoch count (default: 12)
-    --batch-size N             Batch size (default: 128)
+  --batch-size N             Batch size (default: 64)
   --learning-rate VALUE      Learning rate (default: 5e-4)
   --chunk-size N             Examples per training chunk (default: 512)
   --train-epoch-size N       Training examples per epoch (default: 32768)
     --val-limit N              HF validation examples (default: 0 = full split)
     --driving-holdout-limit N  Unseen DrivingStereo holdout examples (default: 512)
+  --target-vram-gb N         Target used for batch-size suggestions (default: 40)
   --monitor-interval SEC     GPU/progress polling interval (default: 30)
   --attach                   Attach to the tmux session after launch
   --dry-run                  Print the resolved command/session details without launching
@@ -57,12 +58,13 @@ run_name=""
 session_name=""
 gpu="1"
 epochs="12"
-batch_size="128"
+batch_size="64"
 learning_rate="5e-4"
 chunk_size="512"
 train_epoch_size="32768"
 val_limit="16"
 driving_holdout_limit="512"
+target_vram_gb="40"
 monitor_interval="30"
 attach_after_launch=0
 dry_run=0
@@ -110,6 +112,10 @@ while [[ $# -gt 0 ]]; do
             driving_holdout_limit="$2"
             shift 2
             ;;
+        --target-vram-gb)
+            target_vram_gb="$2"
+            shift 2
+            ;;
         --monitor-interval)
             monitor_interval="$2"
             shift 2
@@ -138,11 +144,6 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
-
-if (( batch_size <= 0 || (batch_size & (batch_size - 1)) != 0 )); then
-    echo "--batch-size must be a positive power of 2; got: $batch_size" >&2
-    exit 2
-fi
 
 if ! command -v tmux >/dev/null 2>&1; then
     echo "tmux is required but was not found in PATH." >&2
@@ -173,6 +174,8 @@ done_file="$output_dir/.train.done"
 status_file="$output_dir/.train.status"
 train_launcher="$output_dir/tmux_train_launcher.sh"
 monitor_launcher="$output_dir/tmux_monitor_launcher.sh"
+target_vram_mb=$((target_vram_gb * 1024))
+
 train_cmd=(
     env
     KERAS_BACKEND=torch
@@ -234,7 +237,7 @@ cd $(printf '%q' "$repo_root")
 log_file=$(printf '%q' "$log_file")
 done_file=$(printf '%q' "$done_file")
 status_file=$(printf '%q' "$status_file")
-printf '[launcher] %s run_name=%s gpu=%s batch_size=%s learning_rate=%s epochs=%s train_epoch_size=%s chunk_size=%s\n' \
+printf '[launcher] %s run_name=%s gpu=%s batch_size=%s learning_rate=%s epochs=%s train_epoch_size=%s chunk_size=%s target_vram_gb=%s\n' \
   "\$(date -Iseconds)" \
   $(printf '%q' "$run_name") \
   $(printf '%q' "$gpu") \
@@ -242,7 +245,8 @@ printf '[launcher] %s run_name=%s gpu=%s batch_size=%s learning_rate=%s epochs=%
   $(printf '%q' "$learning_rate") \
   $(printf '%q' "$epochs") \
   $(printf '%q' "$train_epoch_size") \
-    $(printf '%q' "$chunk_size") | tee -a "\$log_file"
+  $(printf '%q' "$chunk_size") \
+  $(printf '%q' "$target_vram_gb") | tee -a "\$log_file"
 printf '[launcher] command: %s\n' $(printf '%q' "$train_cmd_str") | tee -a "\$log_file"
 set +e
 $train_cmd_str 2>&1 | tee -a "\$log_file"
@@ -264,8 +268,9 @@ status_file=$(printf '%q' "$status_file")
 output_dir=$(printf '%q' "$output_dir")
 gpu=$(printf '%q' "$gpu")
 batch_size=$(printf '%q' "$batch_size")
+target_vram_mb=$(printf '%q' "$target_vram_mb")
 monitor_interval=$(printf '%q' "$monitor_interval")
-printf '[monitor] %s started gpu=%s interval=%ss\n' "\$(date -Iseconds)" "\$gpu" "\$monitor_interval" | tee -a "\$log_file"
+printf '[monitor] %s started gpu=%s interval=%ss target_vram_mb=%s\n' "\$(date -Iseconds)" "\$gpu" "\$monitor_interval" "\$target_vram_mb" | tee -a "\$log_file"
 while [[ ! -e "\$done_file" ]]; do
     mem_used_mb=""
     mem_free_mb=""
@@ -280,13 +285,16 @@ while [[ ! -e "\$done_file" ]]; do
         mem_free_mb="na"
         util_gpu="na"
         util_mem="na"
+        suggested_batch_size="na"
+    else
+        suggested_batch_size=\$(awk -v bs="\$batch_size" -v used="\$mem_used_mb" -v target="\$target_vram_mb" 'BEGIN { if (used <= 0) { print bs } else { printf "%d", int((bs * target / used) + 0.5) } }')
     fi
     if [[ -s "\$output_dir/checkpoints/training_log.csv" ]]; then
         last_csv=\$(tail -n 1 "\$output_dir/checkpoints/training_log.csv")
     else
         last_csv="pending"
     fi
-    printf '[monitor] %s gpu=%s batch_size=%s mem_used_mb=%s mem_free_mb=%s util_gpu=%s util_mem=%s last_csv=%s\n' "\$(date -Iseconds)" "\$gpu" "\$batch_size" "\$mem_used_mb" "\$mem_free_mb" "\$util_gpu" "\$util_mem" "\$last_csv" | tee -a "\$log_file"
+    printf '[monitor] %s gpu=%s mem_used_mb=%s mem_free_mb=%s util_gpu=%s util_mem=%s suggested_batch_size=%s last_csv=%s\n' "\$(date -Iseconds)" "\$gpu" "\$mem_used_mb" "\$mem_free_mb" "\$util_gpu" "\$util_mem" "\$suggested_batch_size" "\$last_csv" | tee -a "\$log_file"
     sleep "\$monitor_interval"
 done
 status=\$(cat "\$status_file" 2>/dev/null || printf 'unknown')
