@@ -249,6 +249,36 @@ def resize_to_shape(
     return left, right, disparity, valid_mask
 
 
+def random_scale_crop_to_shape(
+    left: np.ndarray,
+    right: np.ndarray,
+    disparity: np.ndarray,
+    valid_mask: np.ndarray,
+    *,
+    out_h: int,
+    out_w: int,
+    min_scale: float = 1.0,
+    max_scale: float = 1.5,
+    rng: np.random.Generator,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Randomly crop a region of [min_scale, max_scale] × target size, then resize.
+
+    This provides spatial diversity while properly scaling disparity values via
+    _shared_resize, so the model always sees correctly-scaled GT disparities.
+    """
+    orig_h, orig_w = left.shape[:2]
+    scale = float(rng.uniform(min_scale, max_scale))
+    crop_h = min(orig_h, max(out_h, int(round(out_h * scale))))
+    crop_w = min(orig_w, max(out_w, int(round(out_w * scale))))
+    row0 = int(rng.integers(0, max(1, orig_h - crop_h + 1)))
+    col0 = int(rng.integers(0, max(1, orig_w - crop_w + 1)))
+    left = left[row0 : row0 + crop_h, col0 : col0 + crop_w]
+    right = right[row0 : row0 + crop_h, col0 : col0 + crop_w]
+    disparity = disparity[row0 : row0 + crop_h, col0 : col0 + crop_w]
+    valid_mask = valid_mask[row0 : row0 + crop_h, col0 : col0 + crop_w]
+    return _shared_resize(left, right, disparity, valid_mask, out_h=out_h, out_w=out_w)
+
+
 def crop_resize_to_shape(
     left: np.ndarray,
     right: np.ndarray,

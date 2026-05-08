@@ -76,6 +76,29 @@ def _select_driving_holdout(
     return [holdout_entries[int(index)] for index in indices]
 
 
+def _select_sceneflow_holdout(
+    manifests_dir: Path,
+    *,
+    limit: int,
+    seed: int,
+) -> list[dict]:
+    sceneflow_path = manifests_dir / "sceneflow_manifest.json"
+    if not sceneflow_path.exists():
+        return []
+    mixed_manifest = json.loads((manifests_dir / "mixed_train_manifest.json").read_text(encoding="utf-8"))
+    sceneflow_manifest = json.loads(sceneflow_path.read_text(encoding="utf-8"))
+    seen_keys = {_make_manifest_key(entry) for entry in mixed_manifest}
+    holdout_entries = [entry for entry in sceneflow_manifest if _make_manifest_key(entry) not in seen_keys]
+    if not holdout_entries:
+        return []
+    rng = np.random.default_rng(seed)
+    indices = np.arange(len(holdout_entries))
+    rng.shuffle(indices)
+    if limit > 0:
+        indices = indices[:limit]
+    return [holdout_entries[int(i)] for i in indices]
+
+
 def _update_metric_sums(metric_sums: dict[str, float], y_true_batch: np.ndarray, y_pred_batch: np.ndarray) -> None:
     gt_disp = y_true_batch[..., 0]
     valid = y_true_batch[..., 1] > 0.5
@@ -128,6 +151,7 @@ def _save_sample_panel(
     example: StereoExample,
     y_true: np.ndarray,
     y_pred: np.ndarray,
+    left_image: np.ndarray,
     *,
     title: str,
 ) -> dict[str, object]:
@@ -143,7 +167,7 @@ def _save_sample_panel(
     max_err = float(np.nanpercentile(masked_err, 99)) if np.count_nonzero(valid) else 1.0
 
     figure, axes = plt.subplots(1, 4, figsize=(16, 4), constrained_layout=True)
-    axes[0].imshow(example.left_image, cmap="gray", vmin=0.0, vmax=1.0)
+    axes[0].imshow(left_image, cmap="gray", vmin=0.0, vmax=1.0)
     axes[0].set_title("Left")
     axes[1].imshow(masked_gt, cmap="magma", vmin=0.0, vmax=max_disp)
     axes[1].set_title("Ground Truth")
@@ -220,6 +244,7 @@ def _evaluate_examples(
                     chunk_examples[local_index],
                     y_true_batch[local_index],
                     y_pred_batch[local_index],
+                    left_batch[local_index, ..., 0],
                     title=f"{sample_prefix} sample {len(sample_summaries)}",
                 )
             )
@@ -265,6 +290,7 @@ def main() -> None:
     parser.add_argument("--checkpoint", default="", help="Optional checkpoint path (defaults to run_dir/checkpoints/best.keras)")
     parser.add_argument("--output-dir", default="", help="Output directory for evaluation artefacts")
     parser.add_argument("--driving-holdout-limit", type=int, default=2048, help="Number of unseen DrivingStereo holdout examples to evaluate (0 = all)")
+    parser.add_argument("--sceneflow-holdout-limit", type=int, default=1024, help="Number of unseen SceneFlow holdout examples to evaluate (0 = all, -1 = skip)")
     parser.add_argument("--sample-count", type=int, default=6, help="Number of qualitative sample panels per dataset")
     parser.add_argument("--eval-chunk-size", type=int, default=256, help="Examples per evaluation chunk")
     args = parser.parse_args()
@@ -292,6 +318,27 @@ def main() -> None:
         chunk_size=args.eval_chunk_size,
     )
 
+    sceneflow_holdout_entries: list[dict] = []
+    sceneflow_result: dict | None = None
+    if args.sceneflow_holdout_limit >= 0:
+        sceneflow_holdout_entries = _select_sceneflow_holdout(
+            run_dir / "manifests",
+            limit=args.sceneflow_holdout_limit,
+            seed=config.seed + 31,
+        )
+        if sceneflow_holdout_entries:
+            sceneflow_result = _evaluate_manifest_entries(
+                model,
+                sceneflow_holdout_entries,
+                config=config,
+                sample_dir=output_dir / "samples" / "sceneflow_holdout",
+                sample_prefix="sceneflow_holdout",
+                sample_count=args.sample_count,
+                chunk_size=args.eval_chunk_size,
+            )
+        else:
+            print("  SceneFlow holdout: no unseen entries found (all were in training mix)", flush=True)
+
     mini_kitti_examples = load_kitti_hf_examples(
         config.kitti_hf_dataset,
         split="validation",
@@ -308,7 +355,7 @@ def main() -> None:
         rng_seed=config.seed + 29,
     )
 
-    report = {
+    report: dict = {
         "run_dir": str(run_dir),
         "checkpoint": str(checkpoint_path),
         "config": asdict(config),
@@ -321,6 +368,11 @@ def main() -> None:
             **mini_kitti_result,
         },
     }
+    if sceneflow_result is not None:
+        report["sceneflow_holdout"] = {
+            "selected_examples": len(sceneflow_holdout_entries),
+            **sceneflow_result,
+        }
     report_path = output_dir / "evaluation_report.json"
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))

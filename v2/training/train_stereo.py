@@ -35,7 +35,7 @@ import keras
 import numpy as np
 
 from v2.models.keras_student import build_correlation_student
-from v2.training.augmentation import AugmentConfig, augment, crop_resize_to_shape
+from v2.training.augmentation import AugmentConfig, augment, crop_resize_to_shape, random_scale_crop_to_shape, random_scale_crop_to_shape
 from v2.training.hf_utils import resolve_repo_path
 from v2.training.stereo_data import (
     StereoExample,
@@ -114,17 +114,25 @@ def _prepare_inputs(
         valid = ex.valid_mask.astype(np.float32)
 
         if aug_config is not None:
+            # Photometric augmentation only — no geometric crop here
             left, right, disp, valid_bool = augment(
                 left, right, disp, valid.astype(bool),
                 config=aug_config, rng=rng,
             )
             valid = valid_bool.astype(np.float32)
-
-        # Fit to fixed target size
-        left, right, disp, valid_bool = crop_resize_to_shape(
-            left, right, disp, valid.astype(bool),
-            out_h=target_h, out_w=target_w,
-        )
+            # Geometric: random scale-crop then resize with proper disparity scaling
+            left, right, disp, valid_bool = random_scale_crop_to_shape(
+                left, right, disp, valid.astype(bool),
+                out_h=target_h, out_w=target_w,
+                min_scale=1.0, max_scale=1.5,
+                rng=rng,
+            )
+        else:
+            # Fit to fixed target size (with disparity scaling)
+            left, right, disp, valid_bool = crop_resize_to_shape(
+                left, right, disp, valid.astype(bool),
+                out_h=target_h, out_w=target_w,
+            )
         valid = valid_bool.astype(np.float32)
 
         # Clip disparity to model range
@@ -380,10 +388,8 @@ def main() -> None:
     # --- augmentation config ---
     aug_config: AugmentConfig | None = None
     if config.augment:
-        aug_config = AugmentConfig(
-            crop_h=config.target_height,
-            crop_w=config.target_width,
-        )
+        # No crop dimensions — photometrics only; geometry handled by random_scale_crop_to_shape
+        aug_config = AugmentConfig()
 
     # --- load / build manifests ---
     print("Building manifests …", flush=True)
