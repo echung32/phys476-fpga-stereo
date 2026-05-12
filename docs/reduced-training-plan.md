@@ -7,7 +7,6 @@
 - No sparse ground-truth issues like Driving Stereo
 - 40×60 resolution reduces FIFO BRAM from ~21,000 to ~1,300 BRAM_18K (fits within XC7A200T's 730 budget when using streaming/row-buffering later)
 - Simpler resolution allows faster iteration and lower computational cost during development
-- For deployment, forcing grayscale end-to-end (training + inference) removes 3-channel feature-map pressure and further reduces BRAM/bandwidth
 
 ---
 
@@ -25,17 +24,6 @@
 - **Resolution**: 40×60 (H×W, grayscale)
 - **Channels**: 1 (grayscale left + right fed separately)
 - **Fit mode**: `pad` (pad smaller images, crop larger ones)
-
-### Grayscale Policy (Important for BRAM)
-- Convert all training inputs to grayscale in preprocessing before resize/fit
-- Keep model input as single-channel throughout (no RGB path)
-- Keep camera/deployment preprocessing grayscale-first before FPGA model ingress
-- If source sensor is RGB/YUV, convert once at ingress and discard chroma channels
-
-**Why this helps**:
-- Activations and line buffers scale with channel count; moving from 3 channels to 1 channel cuts these early-memory terms by about 3x
-- Stream bandwidth is reduced by about 3x for the same geometry
-- Compute load in early layers is lower, improving timing margin
 
 ### Feature Extractor
 - Conv2D(8, 3×3, padding=same, relu)  ← **reduced** from 16 channels
@@ -85,7 +73,6 @@
 | **Chunk size** | 256 | Data loading batch; reasonable for large batch training |
 | **Train epoch size** | 8192 | Examples per epoch; enough for stable training (~40 batches/epoch at bs=256) |
 | **Loader workers** | 4 | Parallel disk I/O; reduce if VRAM pressure or if training on slow storage |
-| **Input color mode** | grayscale only | Force single-channel preprocessing for all train/val examples |
 | **Augmentation** | enabled | Keep: random crop, flip, brightness/contrast help synthetic→real generalization |
 | **Seed** | 0 | Fixed for reproducibility |
 
@@ -110,12 +97,9 @@ scripts/run_train_tmux.sh \
   --target-width 60 \
   --max-disp 24 \
   --feature-channels 8 \
-  --input-color grayscale \
   --input-fit-mode pad \
   --no-augment-off
 ```
-
-If `--input-color` is not currently available in the training CLI, implement it as a no-op compatibility flag first and enforce grayscale in the dataset loader path.
 
 ---
 
@@ -142,8 +126,6 @@ Instance BRAM ≈ 45 BRAM_18K (from weights)
 Total BRAM ≈ 1,350 (vs 21,100)
 Utilization ≈ 185% (fits within 730 with row-streaming optimization or constraint relaxation)
 ```
-
-With grayscale enforced end-to-end, additional BRAM pressure from multi-channel input buffering is reduced. This does not remove the need for row-streaming/reuse optimization, but it improves feasibility margin on XC7A200T.
 
 ---
 
@@ -200,8 +182,7 @@ Then synthesize via Vitis HLS 2025.2 and verify fit within resource budget.
 - **Lens distortion**: Rectified stereo rigs work at any resolution post-rectification; downsampling doesn't break rectification (if done carefully)
 
 #### 2. **Bandwidth**
-- **At-camera grayscale**: 640×480×2 (stereo)×8-bit = 614 KB/frame. At 30 Hz: **18.4 MB/s** (USB 3.0: 400 MB/s ✓)
-- **If camera outputs RGB and conversion is external**: 640×480×2×24-bit = 1.84 MB/frame. At 30 Hz: **55.3 MB/s** before grayscale conversion
+- **At-camera**: 640×480×2 (stereo)×8-bit = 614 KB/frame. At 30 Hz: **18.4 MB/s** (USB 3.0: 400 MB/s ✓)
 - **Post-downsampling**: 40×60×2×8-bit = **4,800 bytes/frame**. At 30 Hz: **144 KB/s** (trivial, even over USB 2.0)
 - **FPGA interface**: AXI streaming at the downsampled rate; ~1 Mbps data throughput easily handled by XC7A200T
 
@@ -212,9 +193,8 @@ Then synthesize via Vitis HLS 2025.2 and verify fit within resource budget.
 
 #### 4. **Preprocessing on Host CPU/GPU**
 - Option A: **On-device** (e.g., in the stereo camera module or edge compute): Many modern modules (OAK-D) support onboard resizing; cost is minimal.
-- Option B: **FPGA preprocessor**: grayscale + downsampling in a streaming front-end before the model
-- Option C: **Host CPU**: software grayscale + resize if FPGA preprocessor is not ready
-- **Recommendation for real-time with no NEON/SSE**: avoid laptop proxy in normal operation; do grayscale/resize in FPGA streaming logic
+- Option B: **Host CPU/FPGA**: Bilinear downsampling kernel in HLS or CPU is cheap (~few µs for 40×60)
+- **Recommendation for real-time**: Downsample in-camera if supported, or in a CPU thread before FPGA
 
 #### 5. **Latency**
 - Inference on model: ~5–10 ms (RF=144, small model, 65 MHz estimated Fmax on XC7A200T)
@@ -229,7 +209,7 @@ Then synthesize via Vitis HLS 2025.2 and verify fit within resource budget.
 ```
 Stereo Camera (e.g., OAK-D, 640×480)
     ↓
-[Grayscale convert + downsample to 40×60 in FPGA streaming preprocessor]
+[In-camera downsampling to 40×60 (or via NEON/SSE on ARM)]
     ↓
 AXI-Stream into FPGA (io_stream interface)
     ↓

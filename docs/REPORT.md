@@ -1,4 +1,4 @@
-	# Stereo Depth Estimation — FPGA Project Report
+# Stereo Depth Estimation — FPGA Project Report
 
 ## Overview
 
