@@ -1,0 +1,7 @@
+{
+  "backend": "Vitis",
+  "precision": "fixed<16,6>",
+  "samples": 8,
+  "mean_abs_error": 0.02142396569252014,
+  "max_abs_error": 0.42948275804519653
+}
