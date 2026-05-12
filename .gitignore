@@ -20,3 +20,26 @@ v1/output/
 *.keras
 *.h5
 *.npz
+v2/data/perspective_stereo/
+
+# HLS4ML large build artifacts (regenerable via convert_student.py + Vitis HLS)
+v2/hls4ml/fixed16_6/myproject_prj/
+v2/hls4ml/fixed16_6/tb_data/
+logs/monkaa_crop16x9_sf25_fc32_h160_w288_bs128/hls4ml/
+
+# Simulation data (regenerable via run_parallel_xsim.sh)
+v2/hls4ml/parallel_sim/
+v2/hls4ml/vivado_sim_project/
+
+# Compiled HLS shared libraries
+*.so
+
+# Vivado/xsim runtime generated files
+*.jou
+vivado*.log
+xvlog.pb
+vivado_pid*.zip
+
+# Lower-quality video (keep only _10fps version)
+v2/hls4ml/feature_video.mp4
+xvlog.pb
